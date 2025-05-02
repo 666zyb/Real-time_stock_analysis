@@ -126,9 +126,9 @@ python manage.py runserver
 
   ![](./image/联想截图_20250501224659.png)
 
-  ![](C:\Users\zyb\Desktop\local repository\image\联想截图_20250501224723.png)
+  ![](./image/联想截图_20250501224723.png)
 
-  ![](C:\Users\zyb\Desktop\local repository\image\联想截图_20250501224739.png)
+  ![](./image/联想截图_20250501224739.png)
 
 - 交易记录页：查看历史交易记录
 
