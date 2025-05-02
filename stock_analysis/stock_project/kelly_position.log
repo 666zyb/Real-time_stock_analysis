@@ -1,0 +1,285 @@
+2025-05-01 22:32:57,803 - INFO - 初始化凯利公式仓位管理器...
+2025-05-01 22:32:57,813 - INFO - 配置文件 kelly_config.json 加载成功
+2025-05-01 22:32:57,813 - INFO - 总资金: 100000元，可用资金: 80000元
+2025-05-01 22:32:58,252 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:32:58,268 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:32:58,268 - INFO - 凯利公式仓位管理器初始化完成
+2025-05-01 22:32:58,268 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:32:58,284 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:32:58,284 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:32:58,284 - ERROR - 同步交易记录失败: 'NoneType' object has no attribute 'execute'
+2025-05-01 22:32:58,284 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 1026, in sync_trade_history_from_logs
+    self.cursor.execute(sell_logs_query)
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'execute'
+
+2025-05-01 22:32:58,284 - INFO - 凯利公式仓位管理器启动，检查间隔: 1秒
+2025-05-01 22:32:58,291 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:32:58,291 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:32:58,302 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:32:58,304 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:32:58,304 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:32:58,304 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:32:58,304 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:32:59,287 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:32:59,287 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:32:59,303 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:32:59,306 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:32:59,306 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:32:59,306 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:32:59,306 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:33:00,289 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:33:00,289 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:33:00,304 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:33:00,304 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:33:00,304 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:33:00,304 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:33:00,310 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:33:01,290 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:33:01,290 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:33:01,308 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:33:01,308 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:33:01,312 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:33:01,312 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:33:01,312 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:33:02,292 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:33:02,292 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:33:02,310 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:33:02,310 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:33:02,313 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:33:02,313 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:33:02,313 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:33:03,293 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:33:03,293 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:33:03,311 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:33:03,313 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:33:03,313 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:33:03,315 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:33:03,315 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:33:04,294 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:33:04,294 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:33:04,302 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:33:04,311 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:33:04,311 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:33:04,311 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:33:04,314 - INFO - 等待 0.98 秒后继续...
+2025-05-01 22:33:05,295 - INFO - === 开始处理买入信号 ===
+2025-05-01 22:33:05,295 - INFO - 数据库连接已断开，尝试重连...
+2025-05-01 22:33:05,305 - ERROR - 数据库连接失败: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+2025-05-01 22:33:05,305 - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 365, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Access denied for user 'root'@'localhost' (using password: YES)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\auto_trader\kelly_position_manager.py", line 121, in connect_to_db
+    self.conn = mysql.connector.connect(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 153, in __init__
+    self.connect(**kwargs)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\abstracts.py", line 1529, in connect
+    self._open_connection()
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\connection_cext.py", line 370, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+2025-05-01 22:33:05,305 - ERROR - 数据库连接失败，无法处理买入信号
+2025-05-01 22:33:05,305 - INFO - 本次处理 0 条买入信号
+2025-05-01 22:33:05,305 - INFO - 等待 0.99 秒后继续...
+2025-05-01 22:33:05,457 - INFO - 检测到Ctrl+C，程序退出...
+2025-05-01 22:33:05,457 - INFO - 程序已退出

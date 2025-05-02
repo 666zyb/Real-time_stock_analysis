@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}错误 - 股票分析系统{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>发生错误</h5>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-emoji-frown" style="font-size: 3rem; color: #dc3545;"></i>
+                    </div>
+                    <h4 class="text-danger mb-3">{{ message }}</h4>
+                    <p class="text-muted">可能的原因：</p>
+                    <ul class="list-unstyled text-start mx-auto" style="max-width: 80%;">
+                        <li><i class="bi bi-dash"></i> 数据库中没有该股票的历史数据</li>
+                        <li><i class="bi bi-dash"></i> 数据库连接出现问题</li>
+                        <li><i class="bi bi-dash"></i> 股票代码格式不正确</li>
+                    </ul>
+                    <div class="mt-4">
+                        <a href="/stocks/" class="btn btn-primary me-2">
+                            <i class="bi bi-list"></i> 返回股票列表
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary">
+                            <i class="bi bi-house"></i> 返回首页
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

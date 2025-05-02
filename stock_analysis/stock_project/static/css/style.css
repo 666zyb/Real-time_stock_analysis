@@ -1,0 +1,106 @@
+/* 自定义样式 */
+.flash-up {
+    animation: flashUp 1s;
+}
+
+.flash-down {
+    animation: flashDown 1s;
+}
+
+@keyframes flashUp {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 0, 0, 0.2); }
+}
+
+@keyframes flashDown {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(0, 255, 0, 0.2); }
+}
+
+@keyframes highlight {
+    0% { background-color: transparent; }
+    30% { background-color: rgba(0, 123, 255, 0.2); }
+    100% { background-color: transparent; }
+}
+
+.news-highlight {
+    animation: highlight 2s ease-out;
+}
+
+/* 股票列表样式 */
+#stock-list-body tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#stock-list-body tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* 新闻列表样式 */
+#news-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+#news-container .list-group-item {
+    transition: background-color 0.2s;
+}
+
+#news-container .list-group-item:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* 图表容器 */
+.chart-container {
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+}
+
+@keyframes flash {
+    0% { background-color: transparent; }
+    50% { background-color: yellow; }
+    100% { background-color: transparent; }
+}
+
+.flash {
+    animation: flash 0.5s ease-in-out;
+}
+
+@keyframes flashIncrease {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 99, 71, 0.5); } /* 浅红色 */
+}
+
+@keyframes flashDecrease {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(144, 238, 144, 0.5); } /* 浅绿色 */
+}
+
+.flash-increase {
+    animation: flashIncrease 1s;
+}
+
+.flash-decrease {
+    animation: flashDecrease 1s;
+}

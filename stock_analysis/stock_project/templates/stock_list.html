@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}股票列表 - 股票分析系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-list-columns"></i> 股票行情列表</h5>
+            <span id="last-update-time">更新时间: --:--:--</span>
+        </div>
+        <div class="card-body p-0">
+            <!-- 添加搜索框 -->
+            <div class="p-3 border-bottom">
+                <div class="input-group">
+                    <input type="text" id="stock-search" class="form-control" placeholder="输入股票代码或名称搜索...">
+                    <button class="btn btn-primary" type="button" id="search-btn">
+                        <i class="bi bi-search"></i> 搜索
+                    </button>
+                </div>
+                <!-- 搜索结果区域 -->
+                <div id="search-results" class="mt-3" style="display: none;">
+                    <h6 class="mb-2">搜索结果</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>代码</th>
+                                    <th>名称</th>
+                                    <th>行业</th>
+                                    <th>交易所</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="search-results-body">
+                                <!-- 搜索结果将在这里动态显示 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th>行业</th>
+                            <th>最新价</th>
+                            <th>涨跌</th>
+                            <th>涨跌幅</th>
+                            <th>成交量(手)</th>
+                            <th>成交额(万元)</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-list-body">
+                        {% for stock in stocks %}
+                        <tr id="stock-row-{{ stock.code }}" data-code="{{ stock.code }}">
+                            <td>{{ stock.code }}</td>
+                            <td>{{ stock.name }}</td>
+                            <td>{{ stock.industry }}</td>
+                            <td class="price">--</td>
+                            <td class="change">--</td>
+                            <td class="change-percent">--</td>
+                            <td class="volume">--</td>
+                            <td class="amount">--</td>
+                            <td>
+                                <a href="/stocks/{{ stock.code }}/" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-zoom-in"></i> 详情
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a href="/stocks/" class="btn btn-primary">
+                <i class="bi bi-list"></i> 查看全部股票
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function loadStockData() {
+        fetch('/api/stocks/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateStockList(data.data);
+                    const now = new Date();
+                    document.getElementById('last-update-time').textContent = '更新时间: ' + now.toLocaleTimeString();
+                } else {
+                    console.error('获取股票数据失败:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('获取股票数据失败:', error);
+            });
+    }
+
+    // 更新股票列表
+    function updateStockList(stockData) {
+        const stockListBody = document.getElementById('stock-list-body');
+
+        // 遍历每个股票数据
+        stockData.forEach(stock => {
+            const row = document.getElementById(`stock-row-${stock.code}`);
+
+            // 如果行存在，更新数据
+            if (row) {
+                // 更新价格
+                const priceCell = row.querySelector('.price');
+                const oldPrice = parseFloat(priceCell.textContent) || 0;
+                priceCell.textContent = stock.current_price.toFixed(2);
+
+                // 检查价格是否变化
+                if (oldPrice && oldPrice !== stock.current_price) {
+                    // 根据价格变化添加不同的闪烁效果
+                    if (stock.current_price > oldPrice) {
+                        // 价格增加，闪烁浅红色
+                        priceCell.classList.add('flash-increase');
+                        setTimeout(() => {
+                            priceCell.classList.remove('flash-increase');
+                        }, 1000); // 动画持续时间
+                    } else {
+                        // 价格降低，闪烁浅绿色
+                        priceCell.classList.add('flash-decrease');
+                        setTimeout(() => {
+                            priceCell.classList.remove('flash-decrease');
+                        }, 1000); // 动画持续时间
+                    }
+                }
+
+                // 更新其他数据
+                row.querySelector('.change').textContent = stock.change.toFixed(2);
+                row.querySelector('.change-percent').textContent = (stock.change_percent * 100).toFixed(2) + '%';
+                row.querySelector('.volume').textContent = (stock.volume / 100).toFixed(0);
+                row.querySelector('.amount').textContent = (stock.amount / 10000).toFixed(2);
+            } else {
+                // 如果行不存在，创建新行
+                const newRow = document.createElement('tr');
+                newRow.id = `stock-row-${stock.code}`;
+                newRow.setAttribute('data-code', stock.code);
+                newRow.innerHTML = `
+                    <td>${stock.code}</td>
+                    <td>${stock.name}</td>
+                    <td>${stock.industry}</td>
+                    <td class="price">${stock.current_price.toFixed(2)}</td>
+                    <td class="change">${stock.change.toFixed(2)}</td>
+                    <td class="change-percent">${(stock.change_percent * 100).toFixed(2)}%</td>
+                    <td class="volume">${(stock.volume / 100).toFixed(0)}</td>
+                    <td class="amount">${(stock.amount / 10000).toFixed(2)}</td>
+                    <td>
+                        <a href="/stocks/${stock.code}/" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-zoom-in"></i> 详情
+                        </a>
+                    </td>
+                `;
+                stockListBody.appendChild(newRow);
+            }
+        });
+    }
+
+    // 搜索股票
+    function searchStocks() {
+        const keyword = document.getElementById('stock-search').value.trim();
+        if (!keyword) {
+            alert('请输入搜索关键词');
+            return;
+        }
+
+        fetch(`/api/search-stock/?keyword=${encodeURIComponent(keyword)}`)
+            .then(response => response.json())
+            .then(data => {
+                const searchResults = document.getElementById('search-results');
+                const searchResultsBody = document.getElementById('search-results-body');
+
+                if (data.status === 'success' && data.data.length > 0) {
+                    // 清空之前的结果
+                    searchResultsBody.innerHTML = '';
+
+                    // 显示搜索结果
+                    data.data.forEach(stock => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${stock.code}</td>
+                            <td>${stock.name}</td>
+                            <td>${stock.industry}</td>
+                            <td>${stock.exchange}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success add-stock-btn"
+                                        data-code="${stock.code}"
+                                        data-name="${stock.name}"
+                                        data-industry="${stock.industry}">
+                                    <i class="bi bi-plus-circle"></i> 添加
+                                </button>
+                            </td>
+                        `;
+                        searchResultsBody.appendChild(row);
+                    });
+
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResultsBody.innerHTML = '<tr><td colspan="5" class="text-center">未找到相关股票</td></tr>';
+                    searchResults.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('搜索股票失败:', error);
+                alert('搜索股票失败，请稍后再试');
+            });
+    }
+
+    // 添加股票
+    function addStock(code, name, industry) {
+        fetch('/api/add-stock/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                code: code,
+                name: name,
+                industry: industry
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message || '股票添加成功');
+                // 刷新页面以显示新添加的股票
+                window.location.reload();
+            } else {
+                alert(data.message || '添加股票失败');
+            }
+        })
+        .catch(error => {
+            console.error('添加股票失败:', error);
+            alert('添加股票失败，请稍后再试');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStockData();
+        setInterval(loadStockData, 1000);  // 每1秒更新一次股票数据
+
+        // 搜索按钮点击事件
+        document.getElementById('search-btn').addEventListener('click', searchStocks);
+
+        // 搜索框回车事件
+        document.getElementById('stock-search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchStocks();
+            }
+        });
+
+        // 添加股票按钮点击事件（使用事件委托）
+        document.getElementById('search-results-body').addEventListener('click', function(e) {
+            if (e.target.closest('.add-stock-btn')) {
+                const btn = e.target.closest('.add-stock-btn');
+                const code = btn.getAttribute('data-code');
+                const name = btn.getAttribute('data-name');
+                const industry = btn.getAttribute('data-industry');
+                addStock(code, name, industry);
+            }
+        });
+    });
+
+    // 每1秒更新一次更新时间
+    setInterval(() => {
+        document.getElementById('last-update-time').textContent = '更新时间: ' + new Date().toLocaleTimeString();
+    }, 1000);
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 闪烁效果增强 */
+    .flash-increase {
+        animation: flashIncrease 1s ease;
+    }
+
+    .flash-decrease {
+        animation: flashDecrease 1s ease;
+    }
+
+    @keyframes flashIncrease {
+        0% { background-color: rgba(255, 82, 82, 0.1); }
+        50% { background-color: rgba(255, 82, 82, 0.3); }
+        100% { background-color: transparent; }
+    }
+
+    @keyframes flashDecrease {
+        0% { background-color: rgba(76, 175, 80, 0.1); }
+        50% { background-color: rgba(76, 175, 80, 0.3); }
+        100% { background-color: transparent; }
+    }
+
+    .table-responsive {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    table {
+        margin-bottom: 0 !important;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .btn-outline-primary {
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        padding: 0.3rem 0.8rem;
+    }
+
+    .btn-outline-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(67, 97, 238, 0.15);
+    }
+
+    /* 搜索框样式 */
+    #stock-search {
+        border-radius: 0.5rem 0 0 0.5rem;
+        border-right: none;
+    }
+
+    #search-btn {
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    /* 搜索结果样式 */
+    #search-results {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    #search-results .table {
+        margin-bottom: 0;
+    }
+
+    .add-stock-btn {
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .add-stock-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.15);
+    }
+</style>
+{% endblock %}

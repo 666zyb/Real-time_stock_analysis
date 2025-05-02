@@ -1,0 +1,11 @@
+{
+    "ths_path": "E:\\同花顺\\同花顺\\xiadan.exe",
+    "ths_main_title": "网上股票交易系统5.0",
+    "ths_trade_title": "同花顺版",
+    "simulate_human": false,
+    "max_trades_per_day": 4,
+    "max_amount_per_trade": 10000.0,
+    "max_retry": 3,
+    "min_interval": 30,
+    "price_adjust_pct": 0.002
+}

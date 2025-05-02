@@ -1,0 +1,27 @@
+{
+    "mysql_config": {
+        "host": "localhost",
+        "port": 3306,
+        "user": "root",
+        "password": "your_password",
+        "database": "stock_analysis"
+    },
+    "kelly_config": {
+        "default_win_rate": 0.55,
+        "max_position_ratio": 0.3,
+        "min_position_ratio": 0.05,
+        "half_kelly": true,
+        "stop_loss_ratio": 0.05,
+        "take_profit_ratio": 0.1,
+        "max_kelly_score": 0.5,
+        "win_loss_ratio": 1.5
+    },
+    "trade_settings": {
+        "total_capital": 100000,
+        "available_capital": 80000,
+        "max_stocks": 5,
+        "min_score_to_buy": 80,
+        "process_interval": 1,
+        "trading_fee_rate": 0.0005
+    }
+}

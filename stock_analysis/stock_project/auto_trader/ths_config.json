@@ -1,0 +1,34 @@
+{
+    "ths_main_title": "网上股票交易系统5.0",
+    "ths_trade_title": "同花顺版",
+    "ths_path": "E:\\同花顺\\同花顺\\xiadan.exe",
+    "verify_code_region": [
+        710,
+        340,
+        780,
+        370
+    ],
+    "verify_code_color": [
+        0,
+        0,
+        0
+    ],
+    "max_retry": 3,
+    "simulate_human": false,
+    "use_tesseract": false,
+    "tesseract_cmd": "..\\tesseract.exe",
+    "mysql_config": {
+        "host": "localhost",
+        "port": 3306,
+        "user": "root",
+        "password": "zyb123456668866",
+        "database": "stock_analysis"
+    },
+    "trade_config": {
+        "max_trades_per_day": 4,
+        "max_amount_per_trade": 10000.0,
+        "min_interval": 30,
+        "confirm_timeout": 5,
+        "price_adjust_pct": 0.002
+    }
+}

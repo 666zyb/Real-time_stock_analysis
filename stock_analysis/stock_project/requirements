@@ -1,0 +1,13 @@
+Django>=4.2.0
+channels>=4.0.0
+django-bootstrap5>=23.3
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+mplfinance>=0.12.9b0
+mysql-connector-python>=8.0.0
+redis>=4.5.0
+aiohttp>=3.8.0
+websockets>=11.0.0
+daphne>=4.0.0
+pyecharts>=2.0.0

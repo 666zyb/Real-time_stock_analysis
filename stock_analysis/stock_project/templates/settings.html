@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block title %}系统设置 - 股票分析系统{% endblock %}
+
+{% block content %}
+<div class="container my-4 fade-in">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-gear me-2"></i>系统设置
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if message %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 选项卡导航 -->
+                    <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="stocks-tab" data-bs-toggle="tab" data-bs-target="#stocks" type="button" role="tab" aria-controls="stocks" aria-selected="true">
+                                <i class="bi bi-graph-up"></i> 股票管理
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai" type="button" role="tab" aria-controls="ai" aria-selected="false">
+                                <i class="bi bi-cpu"></i> AI配置
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab" aria-controls="data" aria-selected="false">
+                                <i class="bi bi-database"></i> 数据采集
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ths-tab" data-bs-toggle="tab" data-bs-target="#ths" type="button" role="tab" aria-controls="ths" aria-selected="false">
+                                <i class="bi bi-bank"></i> 同花顺配置
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="kelly-tab" data-bs-toggle="tab" data-bs-target="#kelly" type="button" role="tab" aria-controls="kelly" aria-selected="false">
+                                <i class="bi bi-calculator"></i> 凯利公式配置
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- 选项卡内容 -->
+                    <div class="tab-content" id="settingsTabsContent">
+                        <!-- 股票管理选项卡 -->
+                        <div class="tab-pane fade show active" id="stocks" role="tabpanel" aria-labelledby="stocks-tab">
+                            <div class="row mb-4">
+                                <div class="col-lg-5">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">添加新股票</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form method="post" action="{% url 'settings' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="add_stock">
+
+                                                <div class="mb-3">
+                                                    <label for="stock_code" class="form-label">股票代码</label>
+                                                    <input type="text" class="form-control" id="stock_code" name="stock_code" placeholder="如: 600436" required>
+                                                    <div class="form-text text-muted">请输入6位数字股票代码，无需前缀</div>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="stock_name" class="form-label">股票名称</label>
+                                                    <input type="text" class="form-control" id="stock_name" name="stock_name" placeholder="如: 片仔癀" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="stock_industry" class="form-label">所属行业</label>
+                                                    <input type="text" class="form-control" id="stock_industry" name="stock_industry" placeholder="如: 中药">
+                                                    <div class="form-text text-muted">选填</div>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="bi bi-plus-circle me-2"></i>添加股票
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">当前股票列表</h5>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="alert alert-warning m-3">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                <strong>注意：</strong>删除股票将同时删除该股票的所有历史数据和实时数据表，此操作不可恢复。
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>股票代码</th>
+                                                            <th>股票名称</th>
+                                                            <th>所属行业</th>
+                                                            <th>操作</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% if stocks %}
+                                                            {% for stock in stocks %}
+                                                            <tr>
+                                                                <td>{{ stock.code }}</td>
+                                                                <td>{{ stock.name }}</td>
+                                                                <td>{{ stock.industry|default:"-" }}</td>
+                                                                <td>
+                                                                    <form method="post" action="{% url 'settings' %}" style="display: inline;">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="action" value="delete_stock">
+                                                                        <input type="hidden" name="stock_code" value="{{ stock.code }}">
+                                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除股票 {{ stock.name }}({{ stock.code }}) 吗？此操作将同时删除该股票的所有数据表！该操作不可恢复！')">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <tr>
+                                                                <td colspan="4" class="text-center py-3">暂无股票数据</td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI配置选项卡 -->
+                        <div class="tab-pane fade" id="ai" role="tabpanel" aria-labelledby="ai-tab">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">AI服务配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'settings' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_ai_config">
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="provider" class="form-label">AI服务提供商</label>
+                                                <select class="form-select" id="provider" name="provider">
+                                                    <option value="deepseek" {% if ai_config.provider == 'deepseek' %}selected{% endif %}>DeepSeek</option>
+                                                    <option value="openai" {% if ai_config.provider == 'openai' %}selected{% endif %}>OpenAI</option>
+                                                    <option value="anthropic" {% if ai_config.provider == 'anthropic' %}selected{% endif %}>Anthropic</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label for="api_key" class="form-label">API Key</label>
+                                                <input type="password" class="form-control" id="api_key" name="api_key" value="{{ ai_config.api_key|default:'' }}">
+                                                <div class="form-text text-muted">请确保API Key安全</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="api_base" class="form-label">API Base URL</label>
+                                                <input type="text" class="form-control" id="api_base" name="api_base" value="{{ ai_config.api_base|default:'https://api.deepseek.com' }}">
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label for="model" class="form-label">模型名称</label>
+                                                <input type="text" class="form-control" id="model" name="model" value="{{ ai_config.model|default:'deepseek-chat' }}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="temperature" class="form-label">温度 (Temperature)</label>
+                                                <input type="number" class="form-control" id="temperature" name="temperature" min="0" max="1" step="0.1" value="{{ ai_config.temperature|default:'0.2' }}">
+                                                <div class="form-text text-muted">值越低，输出越确定性</div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label for="max_retries" class="form-label">最大重试次数</label>
+                                                <input type="number" class="form-control" id="max_retries" name="max_retries" min="1" max="10" value="{{ ai_config.max_retries|default:'3' }}">
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label for="retry_delay" class="form-label">重试延迟(秒)</label>
+                                                <input type="number" class="form-control" id="retry_delay" name="retry_delay" min="1" max="30" value="{{ ai_config.retry_delay|default:'5' }}">
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>保存AI配置
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 数据采集选项卡 -->
+                        <div class="tab-pane fade" id="data" role="tabpanel" aria-labelledby="data-tab">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">数据采集设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'settings' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_settings">
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="realtime_interval" class="form-label">实时数据采集间隔(秒)</label>
+                                                <input type="number" class="form-control" id="realtime_interval" name="realtime_interval" min="1" max="60" value="{{ settings.realtime_interval|default:'1' }}">
+                                                <div class="form-text text-muted">设置过小可能会触发反爬机制</div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>保存数据采集设置
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 同花顺配置选项卡 -->
+                        <div class="tab-pane fade" id="ths" role="tabpanel" aria-labelledby="ths-tab">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">同花顺交易配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'settings' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_ths_config">
+
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            同花顺交易配置用于设置自动交易的基本参数，请根据实际情况调整。
+                                        </div>
+
+                                        <h5 class="mt-4 mb-3">基本设置</h5>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="ths_path" class="form-label">同花顺路径</label>
+                                                <input type="text" class="form-control" id="ths_path" name="ths_path" value="{{ ths_config.ths_path|default:'E:\\同花顺\\同花顺\\xiadan.exe' }}">
+                                                <div class="form-text">同花顺交易软件的安装路径</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="max_retry" class="form-label">最大重试次数</label>
+                                                <input type="number" class="form-control" id="max_retry" name="max_retry" value="{{ ths_config.max_retry|default:3 }}">
+                                                <div class="form-text">交易失败时的最大重试次数</div>
+                                            </div>
+                                        </div>
+
+                                        <h5 class="mt-4 mb-3">交易限制</h5>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="max_trades_per_day" class="form-label">每日最大交易次数</label>
+                                                <input type="number" class="form-control" id="max_trades_per_day" name="max_trades_per_day" value="{{ ths_config.trade_config.max_trades_per_day|default:5 }}">
+                                                <div class="form-text">每天最多可以执行多少次交易</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="max_amount_per_trade" class="form-label">单笔最大金额</label>
+                                                <input type="number" class="form-control" id="max_amount_per_trade" name="max_amount_per_trade" value="{{ ths_config.trade_config.max_amount_per_trade|default:10000 }}">
+                                                <div class="form-text">每笔交易的最大金额（元）</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="min_interval" class="form-label">交易间隔(秒)</label>
+                                                <input type="number" class="form-control" id="min_interval" name="min_interval" value="{{ ths_config.trade_config.min_interval|default:30 }}">
+                                                <div class="form-text">两次交易之间的最小时间间隔</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="confirm_timeout" class="form-label">确认超时(秒)</label>
+                                                <input type="number" class="form-control" id="confirm_timeout" name="confirm_timeout" value="{{ ths_config.trade_config.confirm_timeout|default:5 }}">
+                                                <div class="form-text">等待交易确认的最大时间</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="price_adjust_pct" class="form-label">价格调整比例</label>
+                                                <input type="number" class="form-control" id="price_adjust_pct" name="price_adjust_pct" step="0.001" value="{{ ths_config.trade_config.price_adjust_pct|default:0.002 }}">
+                                                <div class="form-text">买入时价格上调比例，卖出时价格下调比例</div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>保存同花顺配置
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 凯利公式配置选项卡 -->
+                        <div class="tab-pane fade" id="kelly" role="tabpanel" aria-labelledby="kelly-tab">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">凯利公式配置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'settings' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_kelly_config">
+
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            凯利公式用于计算最优仓位，请根据您的风险承受能力调整参数。
+                                        </div>
+
+                                        <h5 class="mt-4 mb-3">凯利公式参数</h5>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="default_win_rate" class="form-label">默认胜率</label>
+                                                <input type="number" class="form-control" id="default_win_rate" name="default_win_rate" step="0.01" value="{{ kelly_config.kelly_config.default_win_rate|default:0.55 }}">
+                                                <div class="form-text">默认的交易胜率，范围0-1</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="max_position_ratio" class="form-label">最大仓位比例</label>
+                                                <input type="number" class="form-control" id="max_position_ratio" name="max_position_ratio" step="0.01" value="{{ kelly_config.kelly_config.max_position_ratio|default:0.3 }}">
+                                                <div class="form-text">单个股票的最大仓位比例，范围0-1</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="half_kelly" class="form-label">使用半凯利</label>
+                                                <select class="form-select" id="half_kelly" name="half_kelly">
+                                                    <option value="true" {% if kelly_config.kelly_config.half_kelly %}selected{% endif %}>是</option>
+                                                    <option value="false" {% if not kelly_config.kelly_config.half_kelly %}selected{% endif %}>否</option>
+                                                </select>
+                                                <div class="form-text">是否使用半凯利公式（更保守的仓位计算）</div>
+                                            </div>
+                                        </div>
+
+                                        <h5 class="mt-4 mb-3">风险控制</h5>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="stop_loss_ratio" class="form-label">止损比例</label>
+                                                <input type="number" class="form-control" id="stop_loss_ratio" name="stop_loss_ratio" step="0.01" value="{{ kelly_config.kelly_config.stop_loss_ratio|default:0.05 }}">
+                                                <div class="form-text">单个股票的最大亏损比例，范围0-1</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="take_profit_ratio" class="form-label">止盈比例</label>
+                                                <input type="number" class="form-control" id="take_profit_ratio" name="take_profit_ratio" step="0.01" value="{{ kelly_config.kelly_config.take_profit_ratio|default:0.1 }}">
+                                                <div class="form-text">单个股票的目标盈利比例，范围0-1</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="max_kelly_score" class="form-label">最大凯利分数</label>
+                                                <input type="number" class="form-control" id="max_kelly_score" name="max_kelly_score" step="0.01" value="{{ kelly_config.kelly_config.max_kelly_score|default:0.5 }}">
+                                                <div class="form-text">凯利公式计算出的最大仓位分数，范围0-1</div>
+                                            </div>
+                                        </div>
+
+                                        <h5 class="mt-4 mb-3">资金管理</h5>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="total_capital" class="form-label">总资金</label>
+                                                <input type="number" class="form-control" id="total_capital" name="total_capital" value="{{ kelly_config.trade_settings.total_capital|default:100000 }}">
+                                                <div class="form-text">账户总资金（元）</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="available_capital" class="form-label">可用资金</label>
+                                                <input type="number" class="form-control" id="available_capital" name="available_capital" value="{{ kelly_config.trade_settings.available_capital|default:80000 }}">
+                                                <div class="form-text">可用于交易的资金（元）</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="max_stocks" class="form-label">最大持仓数量</label>
+                                                <input type="number" class="form-control" id="max_stocks" name="max_stocks" value="{{ kelly_config.trade_settings.max_stocks|default:5 }}">
+                                                <div class="form-text">同时持有的最大股票数量</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="min_score_to_buy" class="form-label">最小买入分数</label>
+                                                <input type="number" class="form-control" id="min_score_to_buy" name="min_score_to_buy" value="{{ kelly_config.trade_settings.min_score_to_buy|default:80 }}">
+                                                <div class="form-text">股票评分达到多少分才考虑买入，范围0-100</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="trading_fee_rate" class="form-label">交易费率</label>
+                                                <input type="number" class="form-control" id="trading_fee_rate" name="trading_fee_rate" step="0.0001" value="{{ kelly_config.trade_settings.trading_fee_rate|default:0.0005 }}">
+                                                <div class="form-text">交易手续费率，包括佣金和印花税</div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>保存凯利公式配置
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 激活Bootstrap选项卡
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取URL参数中的tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+
+        if (activeTab) {
+            // 激活对应的选项卡
+            const tab = document.querySelector(`#${activeTab}-tab`);
+            if (tab) {
+                const bsTab = new bootstrap.Tab(tab);
+                bsTab.show();
+            }
+        }
+
+        // 添加点击事件，更新URL
+        const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function(event) {
+                const id = event.target.id.replace('-tab', '');
+                const url = new URL(window.location);
+                url.searchParams.set('tab', id);
+                window.history.replaceState({}, '', url);
+            });
+        });
+    });
+</script>
+{% endblock %} 

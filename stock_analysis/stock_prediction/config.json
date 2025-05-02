@@ -1,0 +1,69 @@
+{
+    "stocks": [
+        {
+          "code": "600461",
+          "name": "洪城环境",
+          "industry": "环保工程及服务"
+        },
+        {
+          "code": "600436",
+          "name": "片仔癀",
+          "industry": "中药"
+        },
+        {
+          "code": "600085",
+          "name": "同仁堂",
+          "industry": "中药"
+        },
+        {
+          "code": "600993",
+          "name": "马应龙",
+          "industry": "中药"
+        },
+        {
+          "code": "002864",
+          "name": "盘龙药业",
+          "industry": "中药"
+        },
+        {
+          "code": "600362",
+          "name": "江西铜业",
+          "industry": "工业金属"
+        },
+        {
+          "code": "000423",
+          "name": "东阿阿胶",
+          "industry": "中药"
+        },
+        {
+          "code": "000999",
+          "name": "华润三九",
+          "industry": "中药"
+        }
+    ],
+    "data_types": {
+        "daily": true,
+        "minute": true,
+        "financial": true,
+        "fundamental": true,
+        "holder": true,
+        "margin": true,
+        "industry": true
+    },
+    "mysql_config": {
+        "host": "localhost",
+        "port": 3306,
+        "user": "root",
+        "password": "zyb123456668866",
+        "database": "stock_analysis"
+    },
+    "redis_config": {
+        "host": "localhost",
+        "port": 6379,
+        "db": 0,
+        "password": null
+    },
+    "settings": {
+        "realtime_interval": 5
+    }
+}

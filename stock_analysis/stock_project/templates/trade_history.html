@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}交易记录 - 股票分析系统{% endblock %}
+
+{% block content %}
+<div class="container my-4 fade-in">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-journal-text me-2"></i>交易记录
+                    </h4>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary" onclick="exportToExcel()">
+                            <i class="bi bi-download me-2"></i>导出Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="tradeHistoryTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>交易日期</th>
+                                    <th>股票代码</th>
+                                    <th>股票名称</th>
+                                    <th>买入价格</th>
+                                    <th>卖出价格</th>
+                                    <th>数量</th>
+                                    <th>盈亏率</th>
+                                    <th>盈亏金额</th>
+                                    <th>买入时间</th>
+                                    <th>卖出时间</th>
+                                    <th>是否盈利</th>
+                                    <th>仓位比例</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if trade_history %}
+                                    {% for trade in trade_history %}
+                                    <tr>
+                                        <td>{{ trade.trade_date|date:"Y-m-d" }}</td>
+                                        <td>{{ trade.stock_code }}</td>
+                                        <td>{{ trade.stock_name }}</td>
+                                        <td>{{ trade.buy_price }}</td>
+                                        <td>{{ trade.sell_price|default:"-" }}</td>
+                                        <td>{{ trade.quantity }}</td>
+                                        <td class="{% if trade.profit_rate > 0 %}text-success{% elif trade.profit_rate < 0 %}text-danger{% endif %}">
+                                            {{ trade.profit_rate|default:"-" }}%
+                                        </td>
+                                        <td class="{% if trade.profit_amount > 0 %}text-success{% elif trade.profit_amount < 0 %}text-danger{% endif %}">
+                                            {{ trade.profit_amount|default:"-" }}
+                                        </td>
+                                        <td>{{ trade.buy_time|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ trade.sell_time|date:"Y-m-d H:i:s"|default:"-" }}</td>
+                                        <td>
+                                            {% if trade.is_win is not None %}
+                                                {% if trade.is_win %}
+                                                    <span class="badge bg-success">盈利</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">亏损</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-secondary">未完成</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ trade.actual_position|default:"-" }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="12" class="text-center py-3">暂无交易记录</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    function exportToExcel() {
+        const table = document.getElementById('tradeHistoryTable');
+        const wb = XLSX.utils.table_to_book(table, {sheet: "交易记录"});
+        XLSX.writeFile(wb, "交易记录.xlsx");
+    }
+
+    // 添加表格排序功能
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById('tradeHistoryTable');
+        const headers = table.querySelectorAll('th');
+
+        headers.forEach((header, index) => {
+            header.addEventListener('click', () => {
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                const isAsc = header.classList.contains('asc');
+
+                // 清除所有排序标记
+                headers.forEach(h => {
+                    h.classList.remove('asc', 'desc');
+                });
+
+                // 设置当前排序方向
+                header.classList.add(isAsc ? 'desc' : 'asc');
+
+                // 排序行
+                rows.sort((a, b) => {
+                    const aValue = a.children[index].textContent;
+                    const bValue = b.children[index].textContent;
+
+                    if (isAsc) {
+                        return aValue.localeCompare(bValue);
+                    } else {
+                        return bValue.localeCompare(aValue);
+                    }
+                });
+
+                // 重新插入排序后的行
+                const tbody = table.querySelector('tbody');
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+</script>
+
+<style>
+    th {
+        cursor: pointer;
+        position: relative;
+    }
+
+    th.asc::after {
+        content: '↑';
+        position: absolute;
+        right: 5px;
+    }
+
+    th.desc::after {
+        content: '↓';
+        position: absolute;
+        right: 5px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+</style>
+{% endblock %} 

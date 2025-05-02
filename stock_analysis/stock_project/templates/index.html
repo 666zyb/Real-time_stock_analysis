@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+
+{% block title %}股票分析系统 - 首页{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- 股票行情面板 -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> 实时行情</h5>
+                    <span id="last-update-time">更新时间: --:--:--</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>代码</th>
+                                    <th>名称</th>
+                                    <th>最新价</th>
+                                    <th>涨跌</th>
+                                    <th>涨跌幅</th>
+                                    <th>成交量(手)</th>
+                                    <th>成交额(万元)</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-list-body">
+                                {% for stock in stocks %}
+                                <tr id="stock-row-{{ stock.code }}" data-code="{{ stock.code }}">
+                                    <td>{{ stock.code }}</td>
+                                    <td>{{ stock.name }}</td>
+                                    <td class="price">--</td>
+                                    <td class="change">--</td>
+                                    <td class="change-percent">--</td>
+                                    <td class="volume">--</td>
+                                    <td class="amount">--</td>
+                                    <td>
+                                        <a href="/stocks/{{ stock.code }}/" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-zoom-in"></i> 详情
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="/stocks/" class="btn btn-primary">
+                        <i class="bi bi-list"></i> 查看全部股票
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新闻面板 -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-newspaper"></i> 实时新闻</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="news-container" class="list-group list-group-flush" style="max-height: 600px; overflow-y: auto;">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            <p class="mt-2">加载新闻数据中...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="/news/" class="btn btn-primary">
+                        <i class="bi bi-list"></i> 查看更多新闻
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 加载新闻数据
+    function loadNewsData() {
+        fetch('/api/news/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateNewsList(data.data);
+                } else {
+                    console.error('获取新闻失败:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('获取新闻失败:', error);
+            });
+    }
+
+    // 更新新闻列表
+    function updateNewsList(newsData) {
+        const newsContainer = document.getElementById('news-container');
+        newsContainer.innerHTML = '';
+
+        if (newsData && newsData.length > 0) {
+            // 打印前几条数据用于调试
+            console.log("收到的新闻数据:", newsData.slice(0, 3));
+
+            newsData.forEach(news => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'list-group-item list-group-item-action';
+
+                // 检查新闻对象中是否有color字段
+                console.log("处理新闻:", news);
+                console.log("新闻是否包含color字段:", 'color' in news);
+                console.log("color值:", news.color);
+
+                // 根据color值确定样式
+                let newsStyle = '';
+                if (news.color === '-21101') {
+                    newsStyle = 'color: red !important;';
+                    console.log("应用红色样式");
+                } else if (news.color === '21111' || news.color === '21109') {
+                    newsStyle = 'color: #ff69b4 !important;'; // 粉色
+                    console.log("应用粉色样式");
+                }
+
+                newsItem.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <small class="text-primary">${news.source || '未知来源'}</small>
+                        <small class="text-muted">${formatTimeAgo(news.datetime || news.pub_time)}</small>
+                    </div>
+                    <p class="mb-1" style="${newsStyle}" data-color="${news.color || '无'}">
+                        ${news.content}
+                    </p>
+                `;
+
+                newsContainer.appendChild(newsItem);
+            });
+        } else {
+            newsContainer.innerHTML = '<div class="text-center py-4"><p>暂无新闻数据</p></div>';
+        }
+    }
+
+    // 格式化时间为"多久前"
+    function formatTimeAgo(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSec = Math.round(diffMs / 1000);
+        const diffMin = Math.round(diffSec / 60);
+        const diffHour = Math.round(diffMin / 60);
+        const diffDay = Math.round(diffHour / 24);
+
+        if (diffSec < 60) {
+            return diffSec + ' 秒前';
+        } else if (diffMin < 60) {
+            return diffMin + ' 分钟前';
+        } else if (diffHour < 24) {
+            return diffHour + ' 小时前';
+        } else {
+            return diffDay + ' 天前';
+        }
+    }
+
+    // 加载股票数据
+    function loadStockData() {
+        fetch('/api/stocks/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateStockList(data.data);
+                    // 更新最后更新时间
+                    const now = new Date();
+                    document.getElementById('last-update-time').textContent = '更新时间: ' + now.toLocaleTimeString();
+                } else {
+                    console.error('获取股票数据失败:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('获取股票数据失败:', error);
+            });
+    }
+
+    // 更新股票列表
+    function updateStockList(stockData) {
+        const stockListBody = document.getElementById('stock-list-body');
+
+        // 遍历每个股票数据
+        stockData.forEach(stock => {
+            const row = document.getElementById(`stock-row-${stock.code}`);
+
+            // 如果行存在，更新数据
+            if (row) {
+                // 更新价格
+                const priceCell = row.querySelector('.price');
+                const oldPrice = parseFloat(priceCell.textContent) || 0;
+                priceCell.textContent = stock.current_price.toFixed(2);
+
+                // 检查价格是否变化
+                if (oldPrice && oldPrice !== stock.current_price) {
+                    // 根据价格变化添加不同的闪烁效果
+                    if (stock.current_price > oldPrice) {
+                        // 价格增加，闪烁浅红色
+                        priceCell.classList.add('flash-increase');
+                        setTimeout(() => {
+                            priceCell.classList.remove('flash-increase');
+                        }, 1000); // 动画持续时间
+                    } else {
+                        // 价格降低，闪烁浅绿色
+                        priceCell.classList.add('flash-decrease');
+                        setTimeout(() => {
+                            priceCell.classList.remove('flash-decrease');
+                        }, 1000); // 动画持续时间
+                    }
+                }
+
+                // 更新其他数据
+                row.querySelector('.change').textContent = stock.change.toFixed(2);
+                row.querySelector('.change-percent').textContent = (stock.change_percent * 100).toFixed(2) + '%';
+                row.querySelector('.volume').textContent = (stock.volume / 100).toFixed(0);
+                row.querySelector('.amount').textContent = (stock.amount / 10000).toFixed(2);
+            } else {
+                // 如果行不存在，创建新行
+                const newRow = document.createElement('tr');
+                newRow.id = `stock-row-${stock.code}`;
+                newRow.setAttribute('data-code', stock.code);
+                newRow.innerHTML = `
+                    <td>${stock.code}</td>
+                    <td>${stock.name}</td>
+                    <td class="price">${stock.current_price.toFixed(2)}</td>
+                    <td class="change">${stock.change.toFixed(2)}</td>
+                    <td class="change-percent">${(stock.change_percent * 100).toFixed(2)}%</td>
+                    <td class="volume">${(stock.volume / 100).toFixed(0)}</td>
+                    <td class="amount">${(stock.amount / 10000).toFixed(2)}</td>
+                    <td>
+                        <a href="/stocks/${stock.code}/" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-zoom-in"></i> 详情
+                        </a>
+                    </td>
+                `;
+                stockListBody.appendChild(newRow);
+            }
+        });
+    }
+
+    // 页面加载完成后立即加载数据
+    document.addEventListener('DOMContentLoaded', function() {
+        // 首次加载
+        loadNewsData();
+        loadStockData();
+
+        // 设置定时刷新
+        setInterval(loadNewsData, 30000); // 每30秒更新一次新闻
+        setInterval(loadStockData, 1000);  // 每5秒更新一次股票数据
+    });
+
+    // 尝试使用WebSocket作为备用选项（如果可用）
+    try {
+        // 股票WebSocket
+        const stockSocket = new WebSocket('ws://' + window.location.host + '/ws/stocks/');
+        stockSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'stock_update') {
+                updateStockList(data.data);
+                document.getElementById('last-update-time').textContent =
+                    '更新时间: ' + new Date().toLocaleTimeString();
+            }
+        };
+
+        // 新闻WebSocket
+        const newsSocket = new WebSocket('ws://' + window.location.host + '/ws/news/');
+        newsSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'news_update') {
+                updateNewsList(data.data);
+            }
+        };
+    } catch (e) {
+        console.log('WebSocket不可用，将使用轮询方式获取数据');
+    }
+
+    // 添加辅助函数获取内联样式
+    function getInlineStyle(id) {
+        if (id === '-21101') return 'color: red;';
+        if (id === '21111' || id === '21103') return 'color: #ff69b4;'; // 粉色
+        if (id === '21105') return 'color: green;';
+        return '';
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 添加闪烁效果样式 */
+    .flash-increase {
+        animation: flashIncrease 1s ease;
+    }
+
+    .flash-decrease {
+        animation: flashDecrease 1s ease;
+    }
+
+    @keyframes flashIncrease {
+        0% { background-color: rgba(255, 82, 82, 0.1); }
+        50% { background-color: rgba(255, 82, 82, 0.3); }
+        100% { background-color: transparent; }
+    }
+
+    @keyframes flashDecrease {
+        0% { background-color: rgba(76, 175, 80, 0.1); }
+        50% { background-color: rgba(76, 175, 80, 0.3); }
+        100% { background-color: transparent; }
+    }
+
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+        transform: translateX(5px);
+    }
+
+    .list-group-item-action:first-child {
+        border-top: none;
+    }
+
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    #news-container {
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    #last-update-time {
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: var(--primary-color);
+    }
+
+    /* 添加涨跌颜色 */
+    .change-up, .change-percent-up {
+        color: #ff5252;
+    }
+
+    .change-down, .change-percent-down {
+        color: #4caf50;
+    }
+</style>
+{% endblock %}

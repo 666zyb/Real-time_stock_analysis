@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}股票分析系统{% endblock %}</title>
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/bootstrap-icons.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <style>
+        /* 自定义样式 */
+        .flash-up {
+            animation: flashUp 1s;
+        }
+
+        .flash-down {
+            animation: flashDown 1s;
+        }
+
+        @keyframes flashUp {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(255, 0, 0, 0.2); }
+        }
+
+        @keyframes flashDown {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(0, 255, 0, 0.2); }
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .stock-card {
+            transition: all 0.3s ease;
+        }
+
+        .stock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+
+        @keyframes flashIncrease {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(255, 99, 71, 0.5); } /* 浅红色 */
+        }
+
+        @keyframes flashDecrease {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(144, 238, 144, 0.5); } /* 浅绿色 */
+        }
+
+        .flash-increase {
+            animation: flashIncrease 1s;
+        }
+
+        .flash-decrease {
+            animation: flashDecrease 1s;
+        }
+
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --info-color: #4895ef;
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: white !important;
+            background-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            border-bottom: none;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 新增光效果果 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        /* 美化滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+
+        /* 添加文本颜色样式 */
+        .text-pink {
+            color: #ff69b4 !important;
+        }
+
+        /* 使用更具体的选择器增加特异性 */
+        #news-container .text-danger,
+        #news-list .text-danger {
+            color: #dc3545 !important;
+        }
+
+        #news-container .text-success,
+        #news-list .text-success {
+            color: #28a745 !important;
+        }
+
+        #news-container .text-pink,
+        #news-list .text-pink {
+            color: #ff69b4 !important;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-graph-up"></i> 股票分析系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'index' %}">
+                            <i class="bi bi-house"></i> 首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/stocks/' in request.path and not '/stocks/' == request.path %}active{% endif %}" href="{% url 'stock_list' %}">
+                            <i class="bi bi-graph-up"></i> 股票列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/news/' in request.path %}active{% endif %}" href="{% url 'news_list' %}">
+                            <i class="bi bi-newspaper"></i> 新闻资讯
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/trade_history/' in request.path %}active{% endif %}" href="{% url 'trade_history' %}">
+                            <i class="bi bi-journal-text"></i> 交易记录
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/settings/' in request.path %}active{% endif %}" href="{% url 'settings' %}">
+                            <i class="bi bi-gear"></i> 系统设置
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">股票分析系统 &copy; {% now "Y" %}</p>
+        </div>
+    </footer>
+
+    <script src="../static/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/js/echarts.min.js"></script>
+    {% block extra_js %}{% endblock %}
+
+    <!-- 添加调试按钮 -->
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; display: none;">
+        <button class="btn btn-sm btn-outline-primary" onclick="debugNewsData()">检查新闻数据</button>
+    </div>
+
+    <script>
+        // 显示调试按钮（开发环境）
+        document.addEventListener('keydown', function(event) {
+            // 按Ctrl+Shift+D显示调试按钮
+            if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+                document.querySelector('div[style*="bottom: 10px; right: 10px"]').style.display = 'block';
+            }
+        });
+
+        function debugNewsData() {
+            // 获取所有新闻元素
+            const newsItems = document.querySelectorAll('.list-group-item');
+            const debugInfo = [];
+
+            newsItems.forEach((item, i) => {
+                const content = item.querySelector('p.mb-1').textContent.trim().substring(0, 30) + '...';
+                const style = item.querySelector('p.mb-1').getAttribute('style') || '无样式';
+
+                debugInfo.push({
+                    index: i + 1,
+                    content: content,
+                    style: style
+                });
+            });
+
+            console.table(debugInfo);
+            alert(`已打印 ${debugInfo.length} 条新闻数据到控制台`);
+        }
+    </script>
+
+    <!-- 添加调试按钮，可临时隐藏在生产环境 -->
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: white; padding: 5px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+        <button class="btn btn-sm btn-outline-primary" onclick="testNewsColors()">测试颜色</button>
+    </div>
+
+    <script>
+        function testNewsColors() {
+            // 获取页面上所有新闻
+            const newsList = document.querySelectorAll('.list-group-item p.mb-1');
+
+            // 随机给一些新闻应用颜色
+            newsList.forEach((item, index) => {
+                // 每3条新闻应用一种颜色
+                if (index % 3 === 0) {
+                    item.style.color = 'red';
+                } else if (index % 3 === 1) {
+                    item.style.color = '#ff69b4';
+                } else if (index % 3 === 2) {
+                    item.style.color = 'green';
+                }
+            });
+
+            alert('已为新闻应用测试颜色，刷新页面恢复正常显示');
+        }
+    </script>
+</body>
+</html>

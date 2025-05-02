@@ -1,0 +1,34 @@
+2025-04-25 13:23:44,879 - StockDecision - INFO - 配置文件加载成功
+2025-04-25 13:23:44,879 - StockDecision - ERROR - 创建连接池失败: mysql.connector.pooling.MySQLConnectionPool() got multiple values for keyword argument 'pool_name'
+2025-04-25 13:23:44,879 - StockDecision - ERROR - 启动实时监控时出错: mysql.connector.pooling.MySQLConnectionPool() got multiple values for keyword argument 'pool_name'
+2025-04-25 13:23:44,882 - StockDecision - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\indicators_analysis\stock_analysis_decision.py", line 1444, in start_realtime_monitor
+    analyzer = StockDecisionAnalyzer()
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\indicators_analysis\stock_analysis_decision.py", line 43, in __init__
+    self.connection_pool = self._create_connection_pool()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\indicators_analysis\stock_analysis_decision.py", line 103, in _create_connection_pool
+    pool = mysql.connector.pooling.MySQLConnectionPool(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: mysql.connector.pooling.MySQLConnectionPool() got multiple values for keyword argument 'pool_name'
+
+2025-04-25 13:25:35,023 - StockDecision - INFO - 配置文件加载成功
+2025-04-25 13:25:35,023 - StockDecision - ERROR - 创建连接池失败: Pool size should be higher than 0 and lower or equal to 32
+2025-04-25 13:25:35,023 - StockDecision - ERROR - 启动实时监控时出错: Pool size should be higher than 0 and lower or equal to 32
+2025-04-25 13:25:35,025 - StockDecision - ERROR - Traceback (most recent call last):
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\indicators_analysis\stock_analysis_decision.py", line 1447, in start_realtime_monitor
+    analyzer = StockDecisionAnalyzer()
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\indicators_analysis\stock_analysis_decision.py", line 43, in __init__
+    self.connection_pool = self._create_connection_pool()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\stock_analysis\stock_project\indicators_analysis\stock_analysis_decision.py", line 106, in _create_connection_pool
+    pool = mysql.connector.pooling.MySQLConnectionPool(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 478, in __init__
+    self._set_pool_size(pool_size)
+  File "D:\pycharm_code\Real-time stock analysis\Lib\site-packages\mysql\connector\pooling.py", line 547, in _set_pool_size
+    raise AttributeError(
+AttributeError: Pool size should be higher than 0 and lower or equal to 32
+
