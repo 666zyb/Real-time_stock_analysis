@@ -44,7 +44,7 @@
 
 1. 克隆项目到本地：
 ```bash
-git clone https://github.com/yourusername/stock-analysis.git
+git clone https://github.com/666zyb/Real-time_stock_analysis.git
 cd stock-analysis
 ```
 
@@ -190,4 +190,4 @@ python manage.py runserver
 
 ## 联系方式
 
-如有问题或建议，请联系：1992002335@qq.com
+如有问题或建议，请联系：1992002335@qq.com(若没有回复可以通过QQ查找微信)
