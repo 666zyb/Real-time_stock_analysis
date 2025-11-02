@@ -18,7 +18,7 @@ class NewsService:
         # 连接到Redis
         redis_config = self.config.get('redis_config', {})
         self.redis_client = redis.Redis(
-            host=redis_config.get('host', 'localhost'),
+            host=redis_config.get('host', '127.0.0.1'),
             port=redis_config.get('port', 6379),
             db=redis_config.get('db', 0),
             password=redis_config.get('password'),

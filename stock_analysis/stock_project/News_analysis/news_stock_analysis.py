@@ -5,8 +5,8 @@ import logging
 import os
 import time
 import hashlib
-from typing import List, Dict, Tuple, Set
 import httpx
+from typing import List, Dict, Tuple, Set
 from datetime import datetime, timedelta
 import pandas as pd
 
@@ -24,14 +24,14 @@ logger = logging.getLogger(__name__)
 
 # 配置
 class Config:
-    def __init__(self, config_path='../config/config.json'):
+    def __init__(self, config_path='config/config.json'):
         try:
-            with open('../config/config.json', 'r', encoding='utf-8') as f:
+            with open('config/config.json', 'r', encoding='utf-8') as f:
                 config = json.load(f)
 
             # Redis配置
             redis_config = config.get('redis_config', {})
-            self.redis_host = redis_config.get('host', 'localhost')
+            self.redis_host = redis_config.get('host', '172.16.0.4')
             self.redis_port = redis_config.get('port', 6379)
             self.redis_db = redis_config.get('db', 0)
             self.redis_password = redis_config.get('password', None)
@@ -58,7 +58,7 @@ class Config:
 
 
 class NewsStockAnalyzer:
-    def __init__(self, config_path='../config/config.json'):
+    def __init__(self, config_path='config/config.json'):
         """初始化分析器"""
         self.config = Config(config_path)
 
@@ -418,12 +418,22 @@ class NewsStockAnalyzer:
         top_risers = sorted(riser_scores.items(), key=lambda x: x[1]['score'], reverse=True)[:2]
         top_fallers = sorted(faller_scores.items(), key=lambda x: x[1]['score'], reverse=True)[:2]
 
+        # 初始化最终结果列表
+        final_risers = []
+        final_fallers = []
+
         # 综合分析
         analysis_summary = "基于最新新闻的分析，"
         if top_risers:
-            analysis_summary += f"预计短期内 {', '.join([f'{info['name']}({code})' for code, info in dict(top_risers).items()])} 可能会有较好表现；"
+            # 先构建股票名称列表
+            riser_stocks = [f"{info['name']}({code})" for code, info in dict(top_risers).items()]
+            riser_str = ', '.join(riser_stocks)
+            analysis_summary += f"预计短期内 {riser_str} 可能会有较好表现；"
+
             if top_fallers:
-                analysis_summary += f"而 {', '.join([f'{info['name']}({code})' for code, info in dict(top_fallers).items()])} 可能面临下行压力。"
+                faller_stocks = [f"{info['name']}({code})" for code, info in dict(top_fallers).items()]
+                faller_str = ', '.join(faller_stocks)
+                analysis_summary += f"而 {faller_str} 可能面临下行压力。"
 
             # 转换为原始格式
             final_risers = [

@@ -1,8 +1,32 @@
 from django.apps import AppConfig
-from stock_analysis.stock_project.News_analysis.news_stock_analysis import NewsStockAnalyzer
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)  # 调整这个层级
+
+print(f"当前目录: {current_dir}")
+print(f"项目根目录: {project_root}")
+print(f"项目根目录是否存在: {os.path.exists(project_root)}")
+
+# 检查stock_analysis目录是否存在
+stock_analysis_path = os.path.join(project_root, 'stock_analysis')
+print(f"stock_analysis路径: {stock_analysis_path}")
+print(f"stock_analysis是否存在: {os.path.exists(stock_analysis_path)}")
+
+# 列出项目根目录下的所有文件和文件夹
+print("项目根目录内容:", os.listdir(project_root))
+
+# 添加项目根目录到Python路径
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+print("Python路径:", sys.path)
+
+#from stock_analysis.stock_project.News_analysis.news_stock_analysis import NewsStockAnalyzer
+from News_analysis.news_stock_analysis import NewsStockAnalyzer
 import threading
 import asyncio
-import os
 import json
 import redis
 import time
@@ -73,7 +97,7 @@ class WebInterfaceConfig(AppConfig):
 
                 # 创建两个Redis连接：一个用于订阅，一个用于查询
                 sub_client = redis.Redis(
-                    host=redis_config.get('host', 'localhost'),
+                    host=redis_config.get('host', '127.0.0.1'),
                     port=redis_config.get('port', 6379),
                     db=redis_config.get('db', 0),
                     password=redis_config.get('password'),
@@ -81,7 +105,7 @@ class WebInterfaceConfig(AppConfig):
                 )
 
                 redis_client = redis.Redis(
-                    host=redis_config.get('host', 'localhost'),
+                    host=redis_config.get('host', '127.0.0.1'),
                     port=redis_config.get('port', 6379),
                     db=redis_config.get('db', 0),
                     password=redis_config.get('password'),

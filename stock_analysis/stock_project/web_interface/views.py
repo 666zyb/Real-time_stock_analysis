@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from decimal import Decimal
 import logging
-from stock_analysis.stock_project.News_analysis.news_stock_analysis import NewsStockAnalyzer
+from News_analysis.news_stock_analysis import NewsStockAnalyzer
 import requests
 import akshare as ak
 import traceback
@@ -305,7 +305,7 @@ def news_list(request):
 
 
 @require_http_methods(["GET"])
-def api_stock_data(request, stock_code=None):
+def                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        api_stock_data(request, stock_code=None):
     """获取股票数据API（从MySQL数据库）"""
     try:
         # 加载配置
@@ -315,7 +315,7 @@ def api_stock_data(request, stock_code=None):
         # 连接到MySQL
         mysql_config = config.get('mysql_config', {})
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '172.16.0.2'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),
@@ -448,7 +448,7 @@ def api_news_data(request):
         except Exception as e:
             logger.error(f"加载配置文件失败: {e}")
             redis_config = {
-                'host': 'localhost',
+                'host': '127.0.0.1',
                 'port': 6379,
                 'db': 0,
                 'password': None
@@ -457,7 +457,7 @@ def api_news_data(request):
         # 连接Redis
         try:
             redis_client = redis.Redis(
-                host=redis_config.get('host', 'localhost'),
+                host=redis_config.get('host', '127.0.0.1'),
                 port=redis_config.get('port', 6379),
                 db=redis_config.get('db', 0),
                 password=redis_config.get('password'),
@@ -629,24 +629,24 @@ def generate_mock_news_data():
     return mock_data
 
 
-def get_realtime_data(request, stock_code):
-    """获取股票的实时分时数据"""
+def get_prev_close_from_history(stock_code):
+    """从历史数据表获取昨收价 - 修正版本"""
     try:
-        # 格式化股票代码
-        formatted_code = format_stock_code(stock_code)
-        print(f"获取股票 {stock_code}(格式化为:{formatted_code}) 的实时分时数据")
+        # 从配置文件获取股票名称
+        config = load_config()
+        stocks = config.get('stocks', [])
+        stock_info = next((s for s in stocks if s['code'] == stock_code), None)
 
-        # 获取今天的日期
-        today = datetime.now().strftime('%Y-%m-%d')
-        print(f"查询日期: {today}")
+        if not stock_info:
+            print(f"在配置中找不到股票代码: {stock_code}")
+            return None
 
-        # 使用Django的database connection
+        stock_name = stock_info['name']
+        table_name = f"{stock_name}_history"
+        print(f"查询历史表获取昨收价: {table_name}")
+
+        # 检查表是否存在
         with connection.cursor() as cursor:
-            # 查询实时数据表
-            table_name = f"stock_{formatted_code}_realtime"
-            print(f"查询表名: {table_name}")
-
-            # 先检查表是否存在
             check_table_query = f"""
             SELECT COUNT(*) 
             FROM information_schema.tables 
@@ -657,91 +657,194 @@ def get_realtime_data(request, stock_code):
             table_exists = cursor.fetchone()[0] > 0
 
             if not table_exists:
-                print(f"表 {table_name} 不存在")
+                print(f"历史数据表 {table_name} 不存在")
+                return None
+
+            # 查询最近一个交易日的数据
+            query = f"""
+            SELECT `日期`, `收盘价` 
+            FROM {table_name} 
+            WHERE `日期` < CURDATE() 
+            ORDER BY `日期` DESC 
+            LIMIT 1
+            """
+            cursor.execute(query)
+            result = cursor.fetchone()
+
+            if result:
+                date, prev_close = result
+                prev_close = float(prev_close)
+                print(f"从历史表获取到昨收价: {prev_close} (日期: {date})")
+                return prev_close
+            else:
+                print(f"历史表 {table_name} 中没有找到昨收价数据")
+                return None
+
+    except Exception as e:
+        print(f"从历史表获取昨收价失败: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+def get_prev_close_from_api(stock_code):
+    """从API获取昨收价"""
+    try:
+        import akshare as ak
+
+        # 使用akshare获取股票基本信息
+        stock_info = ak.stock_individual_info_em(symbol=stock_code)
+        if not stock_info.empty:
+            # 查找昨收价
+            for _, row in stock_info.iterrows():
+                if row['item'] == '昨收':
+                    return float(row['value'])
+
+        return None
+    except Exception as e:
+        print(f"从API获取昨收价失败: {e}")
+        return None
+
+
+def is_trading_time():
+    """判断当前是否为A股交易时间"""
+    from datetime import datetime
+
+    now = datetime.now()
+    weekday = now.weekday()  # 0-4为工作日，5-6为周末
+
+    # 周末非交易
+    if weekday >= 5:
+        return False
+
+    # 法定节假日判断（这里需要更复杂的逻辑，暂时简单处理）
+    # 可以接入节假日API或者维护一个节假日列表
+
+    current_time = now.time()
+
+    # 上午交易时段: 9:30-11:30
+    morning_start = datetime.strptime('09:30', '%H:%M').time()
+    morning_end = datetime.strptime('11:30', '%H:%M').time()
+
+    # 下午交易时段: 13:00-15:00
+    afternoon_start = datetime.strptime('13:00', '%H:%M').time()
+    afternoon_end = datetime.strptime('15:00', '%H:%M').time()
+
+    return ((morning_start <= current_time <= morning_end) or
+            (afternoon_start <= current_time <= afternoon_end))
+
+
+def get_realtime_data(request, stock_code):
+    """获取分时数据 - 修复时间格式问题"""
+    try:
+        # 1. 检查akshare是否可用
+        try:
+            import akshare as ak
+        except ImportError:
+            return JsonResponse({
+                'status': 'error',
+                'message': '请先安装akshare: pip install akshare'
+            })
+
+        # 2. 检查股票代码格式
+        if not stock_code or len(stock_code) != 6:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'股票代码格式错误: {stock_code}，应为6位数字'
+            })
+
+        # 3. 获取昨收价
+        prev_close = get_prev_close_from_history(stock_code)
+        if prev_close is None:
+            prev_close = get_prev_close_from_api(stock_code)
+
+        if prev_close is None:
+            return JsonResponse({
+                'status': 'error',
+                'message': '无法获取基准价格数据，请检查股票代码是否正确'
+            })
+
+        print(f"获取到昨收价: {prev_close}")
+
+        # 4. 获取当日分时数据
+        today = datetime.now().strftime('%Y%m%d')
+        print(f"尝试获取 {stock_code} 在 {today} 的分时数据")
+
+        try:
+            stock_data = ak.stock_zh_a_hist_min_em(
+                symbol=stock_code,
+                period='1',
+                start_date=today,
+                end_date=today,
+                adjust=''
+            )
+        except Exception as e:
+            print(f"akshare获取数据失败: {e}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'获取分时数据失败: {str(e)}'
+            })
+
+        if stock_data.empty:
+            print(f"未获取到 {stock_code} 在 {today} 的分时数据")
+            # 尝试获取最近交易日的分时数据
+            yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
+            print(f"尝试获取昨日 {yesterday} 的数据")
+
+            try:
+                stock_data = ak.stock_zh_a_hist_min_em(
+                    symbol=stock_code,
+                    period='1',
+                    start_date=yesterday,
+                    end_date=yesterday,
+                    adjust=''
+                )
+            except Exception as e:
+                print(f"获取昨日数据也失败: {e}")
                 return JsonResponse({
                     'status': 'error',
-                    'message': f"表 {table_name} 不存在"
+                    'message': f'获取历史分时数据失败: {str(e)}'
                 })
 
-            # 检查表中是否有今天的数据
-            check_data_query = f"""
-            SELECT COUNT(*) FROM {table_name} WHERE `日期` = %s
-            """
-            cursor.execute(check_data_query, [today])
-            records_count = cursor.fetchone()[0]
+            if stock_data.empty:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': '当前无交易数据，请确认股票代码是否正确且市场在交易中'
+                })
 
-            print(f"表 {table_name} 中 {today} 的记录数: {records_count}")
-
-            if records_count == 0:
-                # 如果没有今天的数据，尝试获取任何日期的最新数据
-                print(f"没有今天的数据，尝试获取最新数据")
-                latest_query = f"""
-                SELECT DISTINCT `日期` FROM {table_name} ORDER BY `日期` DESC LIMIT 1
-                """
-                cursor.execute(latest_query)
-                latest_date_result = cursor.fetchone()
-
-                if latest_date_result:
-                    latest_date = latest_date_result[0]
-                    print(f"找到最新日期: {latest_date}")
-                    today = latest_date
-                else:
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': f"数据库中没有实时数据记录"
-                    })
-
-            # 查询实时数据
-            query = f"""
-            SELECT `时间`, `当前价格`, `成交量(手)`, `昨日收盘价` 
-            FROM {table_name} 
-            WHERE `日期` = %s 
-            ORDER BY `时间`
-            """
-
-            cursor.execute(query, [today])
-
-            # 获取列名
-            columns = [col[0] for col in cursor.description]
-
-            # 获取所有结果
-            rows = cursor.fetchall()
-
-            print(f"查询到 {len(rows)} 条记录")
-
-            # 将结果转为字典列表
-            result = []
-            for row in rows:
-                result.append(dict(zip(columns, row)))
-
-        # 处理数据
+        # 5. 处理分时数据 - 修复时间格式问题
         times = []
         prices = []
         volumes = []
-        prev_close = 0
 
-        for row in result:
-            # 提取时间部分
-            time_str = row['时间'].split('-')[-1] if '-' in row['时间'] else row['时间']
+        print(f"获取到的数据列: {stock_data.columns.tolist()}")
+        print(f"数据样例:\n{stock_data.head()}")
+
+        for _, row in stock_data.iterrows():
+            # 处理时间字段 - 直接使用字符串，不需要strftime
+            time_str = str(row['时间'])
+
+            # 如果时间包含日期部分，只取时间部分
+            if ' ' in time_str:
+                time_str = time_str.split(' ')[1]
+
+            # 如果时间包含秒，只取到分钟
+            if ':' in time_str and time_str.count(':') == 2:
+                time_str = ':'.join(time_str.split(':')[:2])
+
             times.append(time_str)
 
-            # 转换价格为浮点数
-            price = float(row['当前价格'])
-            prices.append(price)
+            # 处理价格和成交量
+            try:
+                prices.append(float(row['收盘']))
+                volumes.append(int(row['成交量']))
+            except Exception as e:
+                print(f"处理数据行时出错: {e}, 行数据: {row}")
+                continue
 
-            # 转换成交量为整数
-            volume = int(float(row['成交量(手)']))
-            volumes.append(volume)
-
-            # 获取昨日收盘价
-            if prev_close == 0 and row['昨日收盘价']:
-                prev_close = float(row['昨日收盘价'])
-
-        if not times:
-            return JsonResponse({
-                'status': 'error',
-                'message': '没有找到符合条件的实时数据'
-            })
+        print(f"成功获取 {len(times)} 条分时数据")
+        print(f"时间范围: {times[0]} 到 {times[-1]}")
+        print(f"价格范围: {min(prices) if prices else 'N/A'} 到 {max(prices) if prices else 'N/A'}")
 
         return JsonResponse({
             'status': 'success',
@@ -754,12 +857,12 @@ def get_realtime_data(request, stock_code):
         })
 
     except Exception as e:
-        print(f"获取实时数据失败: {str(e)}")
+        print(f"获取分时数据失败: {str(e)}")
         import traceback
         traceback.print_exc()
         return JsonResponse({
             'status': 'error',
-            'message': str(e)
+            'message': f'获取数据失败: {str(e)}'
         })
 
 
@@ -940,7 +1043,7 @@ def delete_stock_data_from_database(stock_info):
 
         # 连接到MySQL数据库
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),
@@ -1035,7 +1138,7 @@ def delete_stock_data_from_database(stock_info):
 
             # 连接到Redis
             redis_client = redis.Redis(
-                host=redis_config.get('host', 'localhost'),
+                host=redis_config.get('host', '127.0.0.1'),
                 port=redis_config.get('port', 6379),
                 db=redis_config.get('db', 0),
                 password=redis_config.get('password'),
@@ -1185,7 +1288,7 @@ def create_realtime_data_table(stock_code, stock_name):
 
         # 连接到MySQL数据库
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),
@@ -1274,7 +1377,7 @@ def create_history_data_table(stock_code, stock_name):
 
         # 连接到MySQL数据库
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),
@@ -1357,7 +1460,7 @@ def create_technical_indicators_table(stock_code, stock_name):
 
         # 连接到MySQL数据库
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),
@@ -1809,7 +1912,7 @@ def settings_page(request):
     # 加载凯利公式配置
     kelly_config = {}
     try:
-        kelly_config_path = os.path.join(settings.BASE_DIR, 'auto_traderv', 'kelly_config.json')
+        kelly_config_path = os.path.join(settings.BASE_DIR, 'auto_trader', 'kelly_config.json')
         with open(kelly_config_path, 'r', encoding='utf-8') as f:
             kelly_config = json.load(f)
     except Exception as e:
@@ -1839,7 +1942,7 @@ def trade_history_page(request):
         # 连接到MySQL
         mysql_config = config.get('mysql_config', {})
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),

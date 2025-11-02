@@ -18,7 +18,7 @@ matplotlib.use('TkAgg')  # 使用 TkAgg 后端
 
 
 class StockChartAnalyzer:
-    def __init__(self, config_path='../config/config.json'):
+    def __init__(self, config_path='config/config.json'):
         """
         初始化 StockChartAnalyzer 类
         :param config_path: 配置文件的路径

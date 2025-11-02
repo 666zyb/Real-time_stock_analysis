@@ -68,12 +68,35 @@
         border-bottom: 2px solid #1890ff;
     }
 
-    .chart-container {
-        margin-bottom: 20px;
-        background-color: #fff;
+    .kline-subtabs {
+        display: flex;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-left: 10px;
+        flex-wrap: wrap;
+    }
+
+    .kline-subtab {
+        padding: 6px 12px;
+        margin-right: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        font-size: 12px;
+        color: #666;
         border-radius: 4px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
-        padding: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .kline-subtab:hover {
+        background-color: #f5f5f5;
+    }
+
+    .kline-subtab.active {
+        color: #1890ff;
+        background-color: #e6f7ff;
+        font-weight: 500;
     }
 
     .breadcrumb {
@@ -180,12 +203,27 @@
                 <button class="chart-tab" onclick="showChart('ma')">均线</button>
             </div>
 
+            <!-- K线图周期子标签 -->
+            <div id="kline-subtabs" class="kline-subtabs" style="display: flex;">
+                <button class="kline-subtab active" data-period="day">日K</button>
+                <button class="kline-subtab" data-period="week">周K</button>
+                <button class="kline-subtab" data-period="month">月K</button>
+                <button class="kline-subtab" data-period="year">年K</button>
+                <button class="kline-subtab" data-period="quarter">季K</button>
+                <button class="kline-subtab" data-period="120min">120分</button>
+                <button class="kline-subtab" data-period="60min">60分</button>
+                <button class="kline-subtab" data-period="30min">30分</button>
+                <button class="kline-subtab" data-period="15min">15分</button>
+                <button class="kline-subtab" data-period="1min">1分</button>
+            </div>
+
             <!-- K线图容器 -->
             <div id="k-chart-container" class="chart-container">
                 <div id="loading" class="loading">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">加载中...</span>
                     </div>
+                    <div>正在加载K线数据...</div>
                 </div>
                 <div id="chart-container" style="width: 100%; height: 500px;"></div>
             </div>
@@ -243,9 +281,6 @@
 {% endblock %}
 
 {% block extra_js %}
-
-*<!-- 直接添加 CSS 和 JS 文件的路径 -->*
-
 <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -255,6 +290,8 @@
 <script>
     // 从Django模板获取数据
     const chartData = {{ chart_data|safe }};
+    let currentPeriod = 'day'; // 默认日K
+    let candlestickChart = null;
 
     // 准备K线图数据
     const dates = chartData.dates;
@@ -271,156 +308,22 @@
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('loading').style.display = 'flex';
 
+        // 初始化K线周期切换事件
+        initKlinePeriodTabs();
+
         setTimeout(function() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('k-chart-container').style.display = 'block';
 
             // 初始化K线图
-            const candlestickChart = echarts.init(document.getElementById('chart-container'));
-            const candlestickOption = {
-                title: {
-                    text: '{{ stock.name }} K线图',
-                    left: 'center'
-                },
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: {
-                        type: 'cross'
-                    },
-                    formatter: function(params) {
-                        const param = params[0];
-                        return `${param.name}<br/>
-                            开盘价: ${param.data[1]}<br/>
-                            收盘价: ${param.data[2]}<br/>
-                            最低价: ${param.data[3]}<br/>
-                            最高价: ${param.data[4]}<br/>
-                            成交量: ${param.data[5]} 手`;
-                    }
-                },
-                legend: {
-                    data: ['K线', '成交量'],
-                    bottom: 10
-                },
-                grid: [
-                    {
-                        left: '10%',
-                        right: '10%',
-                        height: '60%'
-                    },
-                    {
-                        left: '10%',
-                        right: '10%',
-                        top: '75%',
-                        height: '15%'
-                    }
-                ],
-                xAxis: [
-                    {
-                        type: 'category',
-                        data: dates,
-                        scale: true,
-                        boundaryGap: false,
-                        axisLine: {onZero: false},
-                        splitLine: {show: false},
-                        splitNumber: 20,
-                        min: 'dataMin',
-                        max: 'dataMax'
-                    },
-                    {
-                        type: 'category',
-                        gridIndex: 1,
-                        data: dates,
-                        scale: true,
-                        boundaryGap: false,
-                        axisLine: {onZero: false},
-                        axisTick: {show: false},
-                        splitLine: {show: false},
-                        axisLabel: {show: false},
-                        splitNumber: 20,
-                        min: 'dataMin',
-                        max: 'dataMax'
-                    }
-                ],
-                yAxis: [
-                    {
-                        scale: true,
-                        splitArea: {
-                            show: true
-                        }
-                    },
-                    {
-                        scale: true,
-                        gridIndex: 1,
-                        splitNumber: 2,
-                        axisLabel: {show: false},
-                        axisLine: {show: false},
-                        axisTick: {show: false},
-                        splitLine: {show: false}
-                    }
-                ],
-                dataZoom: [
-                    {
-                        type: 'inside',
-                        xAxisIndex: [0, 1],
-                        start: 50,
-                        end: 100
-                    },
-                    {
-                        show: true,
-                        xAxisIndex: [0, 1],
-                        type: 'slider',
-                        top: '92%',
-                        start: 50,
-                        end: 100
-                    }
-                ],
-                series: [
-                    {
-                        name: 'K线',
-                        type: 'candlestick',
-                        data: data.map(item => [item[1], item[2], item[3], item[4]]),
-                        itemStyle: {
-                            // 红涨绿跌
-                            color: '#e74c3c',
-                            color0: '#2ecc71',
-                            borderColor: '#e74c3c',
-                            borderColor0: '#2ecc71'
-                        },
-                        markPoint: {
-                            data: [
-                                {type: 'max', name: '最高值', valueDim: 'highest'},
-                                {type: 'min', name: '最低值', valueDim: 'lowest'}
-                            ]
-                        }
-                    },
-                    {
-                        name: '成交量',
-                        type: 'bar',
-                        xAxisIndex: 1,
-                        yAxisIndex: 1,
-                        data: data.map(item => item[5]),
-                        itemStyle: {
-                            color: function(params) {
-                                const i = params.dataIndex;
-                                return data[i][1] <= data[i][2] ? '#e74c3c' : '#2ecc71';
-                            }
-                        }
-                    }
-                ],
-                animation: true,
-                animationDuration: 1000,
-                animationEasing: 'elasticOut'
-            };
-
-            // 使用动画绘制K线图
-            candlestickChart.setOption(candlestickOption);
+            initCandlestickChart();
 
             // 初始化其他图表
             initializeOtherCharts();
 
             // 响应窗口大小变化
             window.addEventListener('resize', function() {
-                candlestickChart.resize();
+                if (candlestickChart) candlestickChart.resize();
                 if (window.macdChart) window.macdChart.resize();
                 if (window.rsiChart) window.rsiChart.resize();
                 if (window.bollingerChart) window.bollingerChart.resize();
@@ -429,12 +332,218 @@
         }, 1000);
     });
 
+    // 初始化K线周期切换标签
+    function initKlinePeriodTabs() {
+        const subtabs = document.querySelectorAll('.kline-subtab');
+        subtabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有active类
+                subtabs.forEach(t => t.classList.remove('active'));
+                // 添加active类到当前标签
+                this.classList.add('active');
+
+                // 获取周期类型
+                const period = this.getAttribute('data-period');
+                currentPeriod = period;
+
+                // 加载对应周期的K线数据
+                loadKlineData(period);
+            });
+        });
+    }
+
+    // 加载K线数据
+    function loadKlineData(period) {
+        // 显示加载状态
+        document.getElementById('loading').style.display = 'flex';
+        document.getElementById('chart-container').style.display = 'none';
+
+        // 根据周期获取数据
+        const stockCode = '{{ stock.code }}';
+
+        // 这里需要根据周期调用不同的API
+        // 暂时使用模拟数据，实际开发中需要调用后端API
+        setTimeout(function() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('chart-container').style.display = 'block';
+
+            // 重新初始化K线图
+            initCandlestickChart(period);
+        }, 500);
+    }
+
+    // 初始化K线图
+    function initCandlestickChart(period = 'day') {
+        const chartDom = document.getElementById('chart-container');
+        if (candlestickChart) {
+            candlestickChart.dispose();
+        }
+        candlestickChart = echarts.init(chartDom);
+
+        // 根据周期设置标题
+        const periodNames = {
+            'day': '日K',
+            'week': '周K',
+            'month': '月K',
+            'year': '年K',
+            'quarter': '季K',
+            '120min': '120分钟',
+            '60min': '60分钟',
+            '30min': '30分钟',
+            '15min': '15分钟',
+            '1min': '1分钟'
+        };
+
+        const periodTitle = periodNames[period] || '日K';
+
+        const candlestickOption = {
+            title: {
+                text: `{{ stock.name }} ${periodTitle}线图`,
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                },
+                formatter: function(params) {
+                    const param = params[0];
+                     console.log('成交量数据:', param);
+                    return `${param.name}<br/>
+                        开盘价: ${param.data[1]}<br/>
+                        收盘价: ${param.data[2]}<br/>
+                        最低价: ${param.data[3]}<br/>
+                        最高价: ${param.data[4]}<br/>
+                        成交量: ${param.data[5]} 手`;
+                }
+            },
+            legend: {
+                data: ['K线', '成交量'],
+                bottom: 10
+            },
+            grid: [
+                {
+                    left: '10%',
+                    right: '10%',
+                    height: '60%'
+                },
+                {
+                    left: '10%',
+                    right: '10%',
+                    top: '75%',
+                    height: '15%'
+                }
+            ],
+            xAxis: [
+                {
+                    type: 'category',
+                    data: dates,
+                    scale: true,
+                    boundaryGap: false,
+                    axisLine: {onZero: false},
+                    splitLine: {show: false},
+                    splitNumber: 20,
+                    min: 'dataMin',
+                    max: 'dataMax'
+                },
+                {
+                    type: 'category',
+                    gridIndex: 1,
+                    data: dates,
+                    scale: true,
+                    boundaryGap: false,
+                    axisLine: {onZero: false},
+                    axisTick: {show: false},
+                    splitLine: {show: false},
+                    axisLabel: {show: false},
+                    splitNumber: 20,
+                    min: 'dataMin',
+                    max: 'dataMax'
+                }
+            ],
+            yAxis: [
+                {
+                    scale: true,
+                    splitArea: {
+                        show: true
+                    }
+                },
+                {
+                    scale: true,
+                    gridIndex: 1,
+                    splitNumber: 2,
+                    axisLabel: {show: false},
+                    axisLine: {show: false},
+                    axisTick: {show: false},
+                    splitLine: {show: false}
+                }
+            ],
+            dataZoom: [
+                {
+                    type: 'inside',
+                    xAxisIndex: [0, 1],
+                    start: 50,
+                    end: 100
+                },
+                {
+                    show: true,
+                    xAxisIndex: [0, 1],
+                    type: 'slider',
+                    top: '92%',
+                    start: 50,
+                    end: 100
+                }
+            ],
+            series: [
+                {
+                    name: 'K线',
+                    type: 'candlestick',
+                    data: data.map(item => [item[1], item[2], item[3], item[4]]),
+                    itemStyle: {
+                        // 红涨绿跌
+                        color: '#e74c3c',
+                        color0: '#2ecc71',
+                        borderColor: '#e74c3c',
+                        borderColor0: '#2ecc71'
+                    },
+                    markPoint: {
+                        data: [
+                            {type: 'max', name: '最高值', valueDim: 'highest'},
+                            {type: 'min', name: '最低值', valueDim: 'lowest'}
+                        ]
+                    }
+                },
+                {
+                    name: '成交量',
+                    type: 'bar',
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: data.map(item => item[5]),
+                    itemStyle: {
+                        color: function(params) {
+                            const i = params.dataIndex;
+                            return data[i][1] <= data[i][2] ? '#e74c3c' : '#2ecc71';
+                        }
+                    }
+                }
+            ],
+            animation: true,
+            animationDuration: 1000,
+            animationEasing: 'elasticOut'
+        };
+
+        // 使用动画绘制K线图
+        candlestickChart.setOption(candlestickOption);
+    }
+
     // 切换图表
     function showChart(chartType) {
         document.querySelectorAll('.chart-tab').forEach(tab => {
             tab.classList.remove('active');
         });
 
+        // 显示或隐藏K线周期子标签
+        const klineSubtabs = document.getElementById('kline-subtabs');
         if (chartType === 'k-chart') {
             document.getElementById('k-chart-tab').classList.add('active');
             document.getElementById('k-chart-container').style.display = 'block';
@@ -443,6 +552,9 @@
             document.getElementById('rsi-chart').style.display = 'none';
             document.getElementById('bollinger-chart').style.display = 'none';
             document.getElementById('ma-chart').style.display = 'none';
+
+            // 显示K线周期子标签
+            klineSubtabs.style.display = 'flex';
         } else if (chartType === 'minute') {
             document.getElementById('minute-chart-tab').classList.add('active');
             document.getElementById('k-chart-container').style.display = 'none';
@@ -451,6 +563,9 @@
             document.getElementById('rsi-chart').style.display = 'none';
             document.getElementById('bollinger-chart').style.display = 'none';
             document.getElementById('ma-chart').style.display = 'none';
+
+            // 隐藏K线周期子标签
+            klineSubtabs.style.display = 'none';
 
             // 初始化分时图
             if (!minuteChart) {
@@ -465,6 +580,9 @@
             document.getElementById('rsi-chart').style.display = chartType === 'rsi' ? 'block' : 'none';
             document.getElementById('bollinger-chart').style.display = chartType === 'bollinger' ? 'block' : 'none';
             document.getElementById('ma-chart').style.display = chartType === 'ma' ? 'block' : 'none';
+
+            // 隐藏K线周期子标签
+            klineSubtabs.style.display = 'none';
         }
 
         // 确保图表正确调整大小

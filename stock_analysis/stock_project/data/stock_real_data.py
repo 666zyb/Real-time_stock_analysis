@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_stocks_from_config(config_path: str = '../config/config.json'):
+def get_stocks_from_config(config_path: str = 'config/config.json'):
     """
     从配置文件中获取股票列表，包括主要股票和其他股票
     """
@@ -44,13 +44,13 @@ def get_stocks_from_config(config_path: str = '../config/config.json'):
 
 
 class StockAnalyzer:
-    def __init__(self, config_path: str = '../config/config.json'):
+    def __init__(self, config_path: str = 'config/config.json'):
         self.config_path = config_path
         self.config_last_modified = 0
         self.load_config(config_path)
         # 仅保留Redis连接
         self.redis_client = redis.Redis(
-            host='localhost',
+            host='stock_redis',
             port=6379,
             db=0,
             decode_responses=True
@@ -61,11 +61,13 @@ class StockAnalyzer:
         # 连接到 MySQL
         self.mysql_config = self.config['mysql_config']
         self.mydb = mysql.connector.connect(
-            host=self.mysql_config['host'],
+            host='stock_mysql',
             port=self.mysql_config.get('port', 3306),
             user=self.mysql_config['user'],
             password=self.mysql_config['password'],
-            database=self.mysql_config['database']
+            database=self.mysql_config['database'],
+            connect_timeout=30,
+            autocommit=True
         )
         self.mycursor = self.mydb.cursor()
         # 跟踪每日汇总状态
@@ -1382,24 +1384,68 @@ class StockAnalyzer:
             import traceback
             logger.error(traceback.format_exc())
 
+    async def initialize_missing_historical_data(self):
+        """检查并初始化缺失的历史数据"""
+        stocks = get_stocks_from_config(self.config_path)
+
+        for stock in stocks:
+            stock_name = stock['name']
+            formatted_code = self.format_stock_code(stock['code'])
+            history_table_name = f"{stock_name}_history"
+
+            try:
+                # 检查历史数据表是否存在且有数据
+                check_sql = f"SELECT COUNT(*) FROM `{history_table_name}`"
+                self.mycursor.execute(check_sql)
+                count = self.mycursor.fetchone()[0]
+
+                if count == 0:
+                    logger.warning(f"股票 {stock_name} 的历史数据表为空，开始获取历史数据...")
+
+                    # 获取历史数据
+                    end_date = datetime.now().strftime('%Y%m%d')
+                    start_date = (datetime.now() - timedelta(days=365 * 3)).strftime('%Y%m%d')  # 3年数据
+                    sohu_stock_code = f"cn_{stock['code']}"
+
+                    result = process_stock_history(sohu_stock_code, start_date, end_date, stock_name)
+
+                    if result:
+                        logger.info(f"✅ 成功获取股票 {stock_name} 的历史数据")
+                        # 立即计算技术指标
+                        await self.process_technical_indicators(stock_name)
+                    else:
+                        logger.error(f"❌ 获取股票 {stock_name} 历史数据失败")
+                else:
+                    logger.info(f"股票 {stock_name} 已有 {count} 条历史数据记录")
+
+            except mysql.connector.Error as e:
+                if "doesn't exist" in str(e):
+                    logger.warning(f"股票 {stock_name} 的历史数据表不存在，创建表并获取数据...")
+                    # 创建表
+                    self.create_daily_summary_table(formatted_code)
+                    # 重新尝试获取历史数据
+                    await self.initialize_missing_historical_data()
+                else:
+                    logger.error(f"检查股票 {stock_name} 历史数据时出错: {str(e)}")
+
 
 async def main():
     analyzer = StockAnalyzer()
     try:
-        # 创建三个任务：配置文件监控、历史数据收集和实时监控
+        # 🚨 新增：程序启动时检查并初始化历史数据
+        await analyzer.initialize_missing_historical_data()
+
+        # 原有任务继续执行
         tasks = [
             asyncio.create_task(analyzer.reload_config_if_changed()),
             asyncio.create_task(analyzer.collect_all_data()),
             asyncio.create_task(analyzer.realtime_monitor())
         ]
-
-        # 等待所有任务完成
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:
         logger.info("程序被用户中断")
     except Exception as e:
         logger.error(f"程序运行出错: {str(e)}")
-        logger.error("详细错误信息: ", exc_info=True)
     finally:
         analyzer.cleanup()
 

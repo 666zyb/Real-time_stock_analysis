@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 from typing import List, Dict
-from stock_analysis.data.hot_News_data import NewsSpider
+from data.hot_News_data import NewsSpider
 
 
 class SinaSpider(NewsSpider):

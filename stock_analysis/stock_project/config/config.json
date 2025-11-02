@@ -1,45 +1,54 @@
 {
   "stocks": [
     {
-      "code": "600085",
-      "name": "同仁堂",
-      "industry": "中药"
+      "code": "002007",
+      "name": "华兰生物",
+      "industry": "血制品"
     },
     {
-      "code": "600993",
-      "name": "马应龙",
-      "industry": "中药"
+      "code": "000737",
+      "name": "北方铜土",
+      "industry": "有色金属"
     },
     {
-      "code": "002864",
-      "name": "盘龙药业",
-      "industry": "中药"
+      "code": "002093",
+      "name": "国脉科技",
+      "industry": "通信"
     },
     {
-      "code": "600362",
-      "name": "江西铜业",
-      "industry": "工业金属"
+      "code": "601958",
+      "name": "金钼股份",
+      "industry": "小金属"
     },
     {
-      "code": "000423",
-      "name": "东阿阿胶",
-      "industry": "中药"
+      "code": "002688",
+      "name": "金河生物",
+      "industry": "养殖业"
     },
     {
-      "code": "000999",
-      "name": "华润三九",
-      "industry": "中药"
+      "code": "302132",
+      "name": "中航成飞",
+      "industry": "军工装备"
     },
     {
-      "code": "600461",
-      "name": "洪城环境",
-      "industry": "公用事业"
-    }
-  ],
-  "other_stocks": [
+      "code": "300308",
+      "name": "中际旭创",
+      "industry": "通信"
+    },
     {
-      "code": "002883",
-      "name": "中设股份"
+      "code": "600610",
+      "name": "中毅达",
+      "industry": "化学原料"
+    },
+    {
+      "code": "002911",
+      "name": "佛燃能源",
+      "industry": "光伏"
+    },
+    {
+      "code": "300476",
+      "name": "胜宏科技",
+      "industry": "新能源"
     }
   ],
   "data_types": {
@@ -52,14 +61,14 @@
     "industry": true
   },
   "mysql_config": {
-    "host": "localhost",
+    "host": "172.16.0.3",
     "port": 3306,
     "user": "root",
     "password": "zyb123456668866",
     "database": "stock_analysis"
   },
   "redis_config": {
-    "host": "localhost",
+    "host": "172.16.0.4",
     "port": 6379,
     "db": 0,
     "password": null
@@ -69,7 +78,7 @@
   },
   "ai_config": {
     "provider": "deepseek",
-    "api_key": "sk-9f92c8dcd29c434c8a0b186d962365c7",
+    "api_key": "sk-94730269717a4988940087fc449d33fe",
     "api_base": "https://api.deepseek.com",
     "api_version": "v1",
     "model": "deepseek-chat",

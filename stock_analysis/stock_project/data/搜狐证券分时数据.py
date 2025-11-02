@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class StockPageFetcher:
-    def __init__(self, config_path: str = '../config/config.json'):
+    def __init__(self, config_path: str = 'config/config.json'):
         self.headers = {
             "accept": "*/*",
             "accept-language": "zh-CN,zh;q=0.9",
@@ -65,7 +65,7 @@ class StockPageFetcher:
             logger.error(f"加载配置文件出错: {str(e)}")
             self.config = {
                 "mysql_config": {
-                    "host": "localhost",
+                    "host": "127.0.0.1",
                     "port": 3306,
                     "user": "root",
                     "password": "",
@@ -84,7 +84,7 @@ class StockPageFetcher:
             logger.info(f"准备连接到数据库: {mysql_config.get('host')}:{mysql_config.get('port')}")
 
             self.db_pool = await aiomysql.create_pool(
-                host=mysql_config.get('host', 'localhost'),
+                host=mysql_config.get('host', '127.0.0.1'),
                 port=mysql_config.get('port', 3306),
                 user=mysql_config.get('user', 'root'),
                 password=mysql_config.get('password', ''),
@@ -517,7 +517,7 @@ async def process_stock_minute_data(stock_code: str) -> bool:
         await fetcher.close()
 
 
-async def process_all_stocks_from_config(config_path: str = '../config/config.json') -> bool:
+async def process_all_stocks_from_config(config_path: str = 'config/config.json') -> bool:
     """异步处理配置文件中所有股票分时数据的主函数"""
     fetcher = StockPageFetcher(config_path)
     try:
@@ -546,7 +546,7 @@ def sync_process_stock_minute_data(stock_code: str) -> bool:
         loop.close()
 
 
-def sync_process_all_stocks_from_config(config_path: str = '../config/config.json') -> bool:
+def sync_process_all_stocks_from_config(config_path: str = 'config/config.json') -> bool:
     """同步处理配置文件中所有股票分时数据的包装函数"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

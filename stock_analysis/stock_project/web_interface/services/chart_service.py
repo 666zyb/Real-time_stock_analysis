@@ -14,7 +14,7 @@ import logging
 
 # 导入现有的图表模块
 sys.path.append(os.path.join(settings.BASE_DIR, 'stock_analysis'))
-from stock_analysis.stock_project.stock_analysis.chart.stock_chart import StockChartAnalyzer
+from News_analysis.news_stock_analysis import NewsStockAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +24,15 @@ class ChartService:
         # 不再需要chart_analyzer
         pass
 
-    def generate_stock_charts(self, stock_name):
-        """生成股票图表，带缓存功能"""
+    def generate_stock_charts(self, stock_name,period='day'):
+        """生成股票图表，带缓存功能,支持多周期"""
         chart_dir = os.path.join('static', 'images', 'charts')
         os.makedirs(chart_dir, exist_ok=True)
 
-        # 检查缓存是否存在且仍然有效
+        # 检查缓存是否存在且仍然有效,包含周期信息
         cache_valid = True
         for chart_type in ['candlestick', 'macd', 'rsi', 'bollinger', 'ma']:
-            chart_path = os.path.join(chart_dir, f"{stock_name}_{chart_type}.png")
+            chart_path = os.path.join(chart_dir, f"{stock_name}_{period}_{chart_type}.png")
             if not os.path.exists(chart_path):
                 cache_valid = False
                 break
@@ -45,9 +45,9 @@ class ChartService:
 
         # 如果缓存有效，直接返回图表路径
         if cache_valid:
-            print("使用缓存的图表")
+            print(f"使用缓存的f{period}图表")
             return {
-                'candlestick': f"/static/images/charts/{stock_name}_candlestick.png",
+                'candlestick': f"/static/images/charts/{stock_name}_{period}candlestick.png",
                 'macd': f"/static/images/charts/{stock_name}_macd.png",
                 'rsi': f"/static/images/charts/{stock_name}_rsi.png",
                 'bollinger': f"/static/images/charts/{stock_name}_bollinger.png",
