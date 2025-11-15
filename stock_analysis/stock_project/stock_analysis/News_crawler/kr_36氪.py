@@ -4,7 +4,8 @@ import re
 import asyncio
 from lxml import etree
 from typing import List, Dict
-from stock_analysis.data.hot_News_data import NewsSpider  # 导入NewsSpider基类
+from data.hot_News_data import NewsSpider # 导入NewsSpider基类
+
 
 
 class Kr36Spider(NewsSpider):

@@ -81,7 +81,7 @@ def get_stock_name_from_code(code):
     # 去除可能的前缀
     stock_code = code.replace("cn_", "")
 
-    # 加载配置文件获取股票名称（这里可以根据您的系统修改）
+    # 加载配置文件获取股票名称
     try:
         # 尝试从配置文件获取股票信息
         config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'config.json')
@@ -112,7 +112,7 @@ def save_to_database(stock_name, history_data):
         print(f"读取配置文件失败: {e}")
         # 使用默认配置
         mysql_config = {
-            'host': 'localhost',
+            'host': '172.16.0.3',
             'port': 3306,
             'user': 'root',
             'password': 'zyb123456668866',
@@ -122,7 +122,7 @@ def save_to_database(stock_name, history_data):
     try:
         # 连接到MySQL数据库
         conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),

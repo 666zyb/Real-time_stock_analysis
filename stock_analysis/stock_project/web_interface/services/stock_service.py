@@ -18,7 +18,7 @@ class StockDataService:
         # 连接到MySQL
         mysql_config = self.config.get('mysql_config', {})
         self.mysql_conn = mysql.connector.connect(
-            host=mysql_config.get('host', 'localhost'),
+            host=mysql_config.get('host', '127.0.0.1'),
             port=mysql_config.get('port', 3306),
             user=mysql_config.get('user', 'root'),
             password=mysql_config.get('password', ''),

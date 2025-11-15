@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  stock_project:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8010"  # 根据实际应用端口调整
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai # 设置时区环境变量
+      - DJANGO_SETTINGS_MODULE=stock_project.settings
+    depends_on:
+      - stock_mysql
+      - stock_redis
+    volumes:
+      - ./:/stock_project/:rw
+      - /etc/localtime:/etc/localtime:ro # 挂载宿主机时间文件
+    networks:
+      network:
+         ipv4_address: 172.16.0.2
+    restart: unless-stopped
+
+  stock_collector:
+    build:
+      context: ./
+      dockerfile: Dockerfile.stock_collector
+    container_name: stock_data_collector
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai
+      - STOCK_COLLECTOR=true
+    volumes:
+      - ./:/stock_project/:rw
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      network:
+        ipv4_address: 172.16.0.6
+    restart: unless-stopped
+    depends_on:
+      - stock_mysql
+      - stock_redis
+
+  stock_mysql:
+    image: mysql:8.0
+    container_name: stock_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: zyb123456668866  # 请修改为安全密码
+      MYSQL_DATABASE: stock_analysis
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro # 挂载宿主机时间文件
+    ports:
+      - "3306:3306"
+    networks:
+      network:
+         ipv4_address: 172.16.0.3
+    restart: unless-stopped
+
+  stock_redis:
+    image: redis:7-alpine
+    container_name: stock_redis
+    ports:
+      - "6379:6379"
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
+    command: redis-server --appendonly yes  # 启用持久化
+    networks:
+      network:
+         ipv4_address: 172.16.0.4
+    restart: unless-stopped
+
+networks:
+  network:
+    ipam:
+      driver: default
+      config:
+        - subnet: '172.16.0.0/16'
+
+volumes:
+  mysql_data:
+  redis_data:

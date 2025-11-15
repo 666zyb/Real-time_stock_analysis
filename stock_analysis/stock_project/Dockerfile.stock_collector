@@ -1,0 +1,39 @@
+FROM python:3.9-slim
+
+WORKDIR /stock_project
+
+RUN sed -i 's|http://deb.debian.org|https://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources
+RUN sed -i 's|http://security.debian.org|https://mirrors.aliyun.com/debian-security|g' /etc/apt/sources.list.d/debian.sources
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    build-essential \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# requirements文件
+COPY ./requirements /stock_project/requirements.txt
+
+# requirements_stock_collector文件
+COPY ./requirements_stock_collector /stock_project/requirements_stock_collector.txt
+
+# 安装Python依赖
+RUN pip install --no-cache-dir -r requirements_stock_collector.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+
+# 创建日志目录
+RUN mkdir -p /stock_project/logs
+
+# 设置环境变量
+ENV PYTHONPATH=/stock_project
+ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Shanghai
+
+# 设置时区
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 启动命令
+CMD ["python", "data/stock_real_data.py"]

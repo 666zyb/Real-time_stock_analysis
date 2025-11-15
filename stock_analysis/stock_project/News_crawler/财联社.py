@@ -2,7 +2,8 @@ import asyncio
 import aiohttp
 import datetime
 from typing import List, Dict
-from stock_analysis.data.hot_News_data import NewsSpider
+#from stock_analysis.data.hot_News_data import NewsSpider
+from stock_analysis.News_crawler.财联社 import NewsSpider
 import requests
 
 class ClsSpider(NewsSpider):

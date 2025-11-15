@@ -22,14 +22,14 @@ class NewsAnalysisReceiver:
     从Redis获取news_stock_analysis.py的分析结果
     """
 
-    def __init__(self, config_path='../config/config.json'):
+    def __init__(self, config_path='config/config.json'):
         """初始化接收器"""
         self.config_path = config_path
         self.load_config(config_path)
 
         # 连接Redis
         self.redis_client = redis.Redis(
-            host=self.redis_config.get('host', 'localhost'),
+            host=self.redis_config.get('host', '172.16.0.4'),
             port=self.redis_config.get('port', 6379),
             db=self.redis_config.get('db', 0),
             password=self.redis_config.get('password', None),

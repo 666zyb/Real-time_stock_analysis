@@ -22,7 +22,7 @@ class Sina_stock():
         }
 
         self.timestamp = int(time.time()) * 100
-        self.config_path = '../config/config.json'
+        self.config_path = 'config/config.json'
         self.load_config(self.config_path)
 
         self.url ="https://hq.sinajs.cn/rn={}&list={},{}_i,bk_new_qtxy"

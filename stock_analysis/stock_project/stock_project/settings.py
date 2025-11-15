@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': 'stock_analysis',
         'USER': 'root',
         'PASSWORD': 'zyb123456668866',
-        'HOST': 'localhost',  # 或者您的数据库主机
+        'HOST': '172.16.0.3',  # 或者您的数据库主机
         'PORT': '3306',       # MySQL 默认端口
     }
 }

@@ -20,7 +20,7 @@ class NewsSpider(ABC):
 
 
 class HotNewsStorage:
-    def __init__(self, host='localhost', port=6379, db=0, max_days=30):
+    def __init__(self, host='172.16.0.4', port=6379, db=0, max_days=30):
         """
         初始化Redis连接
         :param host: Redis主机地址
@@ -462,10 +462,10 @@ async def main():
     storage = HotNewsStorage()
 
     # 注册爬虫
-    from stock_analysis.stock_project.News_crawler.kr_36氪 import Kr36Spider
-    from stock_analysis.stock_project.News_crawler.新浪财经 import SinaSpider
-    from stock_analysis.stock_project.News_crawler.同花顺 import ThsSpider
-    from stock_analysis.stock_project.News_crawler.财联社 import ClsSpider
+    from stock_analysis.News_crawler.kr_36氪 import Kr36Spider
+    from stock_analysis.News_crawler.新浪财经 import SinaSpider
+    from stock_analysis.News_crawler.同花顺 import ThsSpider
+    from stock_analysis.News_crawler.财联社 import ClsSpider
 
     # 注册爬虫实例
     storage.register_spider(Kr36Spider())

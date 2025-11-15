@@ -101,10 +101,6 @@ class StockDecisionAnalyzer:
         """从配置文件中获取所有股票"""
         stocks = []
         try:
-            # 获取主要股票列表
-            # main_stocks = self.config.get('stocks', [])
-            # stocks.extend(main_stocks)
-
             # 获取其他股票列表
             other_stocks = self.config.get('other_stocks', [])
             stocks.extend(other_stocks)
@@ -1149,7 +1145,9 @@ class StockDecisionAnalyzer:
             logger.error("没有找到要监控的股票")
             return
 
-        logger.info(f"监控 {len(stocks)} 只股票: {', '.join([f'{s.get('name')}({s.get('code')})' for s in stocks])}")
+        # 修复f-string中的反斜杠问题
+        stock_display = ', '.join([f"{s.get('name')}({s.get('code')})" for s in stocks])
+        logger.info(f"监控 {len(stocks)} 只股票: {stock_display}")
 
         # 存储上次买入建议，用于检测变化
         last_recommendations = {}
@@ -1805,7 +1803,7 @@ class StockDecisionAnalyzer:
                 # 从kelly_config.json配置中读取最大持有股票数
                 try:
                     # 尝试读取kelly_config.json
-                    kelly_config_path = "../auto_trader/kelly_config.json"
+                    kelly_config_path = "auto_trader/kelly_config.json"
                     with open(kelly_config_path, 'r', encoding='utf-8') as f:
                         kelly_config = json.load(f)
                     max_stocks = kelly_config.get('trade_settings', {}).get('max_stocks', 5)

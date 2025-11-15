@@ -185,7 +185,7 @@ class NewsConsumer(AsyncWebsocketConsumer):
         try:
             # 加载配置
             config = getattr(settings, 'REDIS_CONFIG', {
-                'host': 'localhost',
+                'host': '127.0.0.1',
                 'port': 6379,
                 'db': 0,
                 'password': None
@@ -193,7 +193,7 @@ class NewsConsumer(AsyncWebsocketConsumer):
 
             # 连接到Redis
             redis_client = redis.Redis(
-                host=config.get('host', 'localhost'),
+                host=config.get('host', '127.0.0.1'),
                 port=config.get('port', 6379),
                 db=config.get('db', 0),
                 password=config.get('password'),
